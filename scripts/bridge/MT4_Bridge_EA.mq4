@@ -95,8 +95,13 @@ void SendCandle(datetime timeVal, double o, double h, double l, double c, double
    string sym = (BrokerSymbolName == "") ? Symbol() : BrokerSymbolName;
    string tf = GetTimeframeName();
    
-   // Convert time to ISO format (e.g. 2026-07-01T15:00:00Z)
-   string isoTime = TimeToStr(timeVal, TIME_DATE) + "T" + TimeToStr(timeVal, TIME_MINUTES) + ":00Z";
+   // Bar times are in broker-server time. Convert to real UTC before tagging "Z".
+   // Offset = server time - GMT; subtract it so the timestamp is genuine UTC.
+   int serverGmtOffset = (int)(TimeCurrent() - TimeGMT());
+   datetime utcTime = timeVal - serverGmtOffset;
+   
+   // Convert to ISO UTC format (e.g. 2026-07-01T15:00:00Z)
+   string isoTime = TimeToStr(utcTime, TIME_DATE) + "T" + TimeToStr(utcTime, TIME_MINUTES) + ":00Z";
    isoTime = StringReplaceAll(isoTime, ".", "-");
    
    // Format payload as JSON string
@@ -146,7 +151,10 @@ void SendRequest(string url, string payload)
    char resultData[];
    string headers = "Content-Type: application/json\r\n";
    
-   StringToCharArray(payload, postData, 0, StringLen(payload));
+   // StringToCharArray appends a trailing '\0'; strip it so the POST body
+   // is exact JSON with no null byte that would break server-side parsing.
+   StringToCharArray(payload, postData, 0, WHOLE_ARRAY);
+   ArrayResize(postData, ArraySize(postData) - 1);
    
    ResetLastError();
    int res = WebRequest("POST", url, headers, 3000, postData, resultData, headers);
