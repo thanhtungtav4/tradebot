@@ -1,0 +1,60 @@
+{% extends "admin/base.html" %}
+{% block title %}Signal detail{% endblock %}
+{% block content %}
+{% set s = d.signal %}
+<h1>Signal #{{ s.id }} — {{ s.symbol }} {{ s.timeframe }} {{ s.action }}</h1>
+<p><a href="/admin/signals">← Danh sách</a></p>
+
+<h2>Tóm tắt</h2>
+<ul>
+  <li>Status: <span class="status status-{{ s.status }}">{{ s.status }}</span></li>
+  <li>Entry: {{ s.entry or "—" }} · SL: {{ s.sl or "—" }} · TP: {{ s.tp or "—" }}</li>
+  <li>RR: {{ s.risk_reward or "—" }} · Confidence: {{ s.confidence if s.confidence is not none else "—" }}</li>
+  <li>Reason: {{ s.reason or "—" }}</li>
+  <li>Invalid if: {{ s.invalid_if or "—" }}</li>
+  {% if s.reject_code %}<li>Reject: {{ s.reject_code }} — {{ s.reject_message }}</li>{% endif %}
+  <li>UID: <code>{{ s.signal_uid }}</code></li>
+</ul>
+
+<h2>Routing / delivery theo group</h2>
+<table>
+  <thead><tr><th>Outbox</th><th>Group</th><th>Status</th><th>Attempts</th><th>Next retry</th><th>Lỗi</th></tr></thead>
+  <tbody>
+  {% for o in d.outboxes %}
+    <tr><td>{{ o.id }}</td><td>{{ o.group_id }}</td>
+        <td><span class="status status-{{ o.status }}">{{ o.status }}</span></td>
+        <td>{{ o.attempt_count }}/{{ o.max_attempts }}</td>
+        <td>{{ o.next_attempt_at.strftime("%m-%d %H:%M") if o.next_attempt_at else "—" }}</td>
+        <td>{{ o.last_error_message or "—" }}</td></tr>
+  {% else %}
+    <tr><td colspan="6" class="muted">Chưa route tới group nào.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Attempt log</h2>
+<table>
+  <thead><tr><th>Outbox</th><th>#</th><th>Status</th><th>HTTP</th><th>Msg id</th><th>Lỗi</th><th>Thời gian</th></tr></thead>
+  <tbody>
+  {% for a in d.deliveries %}
+    <tr><td>{{ a.outbox_id }}</td><td>{{ a.attempt_no }}</td>
+        <td><span class="status status-{{ a.status }}">{{ a.status }}</span></td>
+        <td>{{ a.http_status_code or "—" }}</td><td>{{ a.telegram_message_id or "—" }}</td>
+        <td>{{ a.error_message or "—" }}</td>
+        <td>{{ a.started_at.strftime("%m-%d %H:%M:%S") }}</td></tr>
+  {% else %}
+    <tr><td colspan="7" class="muted">Chưa có attempt nào.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Event timeline</h2>
+<table>
+  <thead><tr><th>Thời gian</th><th>Event</th><th>Message</th></tr></thead>
+  <tbody>
+  {% for e in d.events %}
+    <tr><td>{{ e.created_at.strftime("%m-%d %H:%M:%S") }}</td><td>{{ e.event_type }}</td><td>{{ e.message or "—" }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

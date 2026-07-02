@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% block title %}Signals{% endblock %}
+{% block content %}
+<h1>Signals</h1>
+<p class="muted">Tổng: {{ pagination.total }} · Trang {{ pagination.page }}/{{ pagination.pages }}</p>
+<table>
+  <thead><tr><th>Created</th><th>Symbol/TF</th><th>Strategy</th><th>Action</th><th>Entry</th><th>SL</th><th>RR</th><th>Conf</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for s in signals %}
+    <tr>
+      <td>{{ s.created_at.strftime("%m-%d %H:%M") }}</td>
+      <td>{{ s.symbol }} {{ s.timeframe }}</td>
+      <td>{{ s.strategy_code }}</td><td>{{ s.action }}</td>
+      <td>{{ s.entry or "—" }}</td><td>{{ s.sl or "—" }}</td>
+      <td>{{ s.risk_reward or "—" }}</td><td>{{ s.confidence if s.confidence is not none else "—" }}</td>
+      <td><span class="status status-{{ s.status }}">{{ s.status }}</span></td>
+      <td><a href="/admin/signals/{{ s.id }}">Chi tiết</a></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="10" class="muted">Chưa có tín hiệu nào. Khi TradingView gửi đủ candle và strategy phát hiện setup, tín hiệu sẽ xuất hiện ở đây.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<nav aria-label="Signals pagination">
+  {% if pagination.has_prev %}
+  <a href="/admin/signals?page={{ pagination.prev_page }}&per_page={{ pagination.per_page }}">Trang trước</a>
+  {% endif %}
+  {% if pagination.has_next %}
+  <a href="/admin/signals?page={{ pagination.next_page }}&per_page={{ pagination.per_page }}">Trang sau</a>
+  {% endif %}
+</nav>
+{% endblock %}

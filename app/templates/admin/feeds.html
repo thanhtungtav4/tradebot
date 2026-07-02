@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+{% block title %}Feeds{% endblock %}
+{% block content %}
+<h1>Feeds</h1>
+<p class="muted">TradingView không tự backfill lịch sử. Nếu alert bị tắt, bot sẽ thiếu candle cho khoảng thời gian đó.</p>
+
+<table>
+  <thead><tr><th>Symbol</th><th>Source symbol</th><th>TF</th><th>Status</th><th>Last candle</th><th>Age</th><th>Ngưỡng stale</th><th>Lỗi</th></tr></thead>
+  <tbody>
+  {% for f in feeds %}
+    <tr>
+      <td>{{ f.symbol }}</td><td>{{ f.source_symbol }}</td><td>{{ f.timeframe }}</td>
+      <td><span class="status status-{{ f.status }}">{{ f.status }}</span></td>
+      <td>{{ f.last_candle_time.strftime("%Y-%m-%d %H:%M") if f.last_candle_time else "—" }}</td>
+      <td>{{ f.age_minutes if f.age_minutes is not none else "—" }} phút</td>
+      <td>{{ f.stale_after_minutes }} phút</td>
+      <td>{{ f.last_error or "—" }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="muted">Chưa nhận webhook nào.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Webhook setup</h2>
+<p class="muted">URL: <code>{{ webhook_url }}</code> (thay <code>{token}</code> bằng TradingView webhook token). Body phải chứa field <code>secret</code>.</p>
+<pre>{
+  "secret": "&lt;body_secret&gt;",
+  "source": "TRADINGVIEW",
+  "symbol": "OANDA:XAUUSD",
+  "timeframe": "M15",
+  "time": "{{ "{{" }}time{{ "}}" }}",
+  "open": "{{ "{{" }}open{{ "}}" }}", "high": "{{ "{{" }}high{{ "}}" }}",
+  "low": "{{ "{{" }}low{{ "}}" }}", "close": "{{ "{{" }}close{{ "}}" }}",
+  "volume": "{{ "{{" }}volume{{ "}}" }}", "isClosed": true
+}</pre>
+{% endblock %}

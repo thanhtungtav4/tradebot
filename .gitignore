@@ -1,0 +1,9 @@
+# ponytail: standard python + local-run ignores, no more
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.run/
+.env
+.DS_Store

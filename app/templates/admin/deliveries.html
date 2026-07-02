@@ -1,0 +1,53 @@
+{% extends "admin/base.html" %}
+{% block title %}Deliveries{% endblock %}
+{% block content %}
+<h1>Deliveries</h1>
+<nav aria-label="Delivery tabs">
+  {% for t, label in [("PENDING","Pending"),("FAILED_RETRYABLE","Failed retryable"),("FAILED_PERMANENT","Failed permanent"),("SENT","Sent")] %}
+    <a href="/admin/deliveries?tab={{ t }}"{% if tab == t %} aria-current="page"{% endif %}>{{ label }}</a>
+  {% endfor %}
+</nav>
+<p class="muted">Tổng: {{ pagination.total }} · Trang {{ pagination.page }}/{{ pagination.pages }}</p>
+
+<table>
+  <thead><tr><th>Created</th><th>Group</th><th>Signal</th><th>Status</th><th>Attempts</th><th>Next retry</th><th>Lỗi</th><th>Thao tác</th></tr></thead>
+  <tbody>
+  {% for o in rows %}
+    <tr>
+      <td>{{ o.created_at.strftime("%m-%d %H:%M") }}</td>
+      <td>{{ o.group_id }}</td>
+      <td><a href="/admin/signals/{{ o.signal_id }}">#{{ o.signal_id }}</a></td>
+      <td><span class="status status-{{ o.status }}">{{ o.status }}</span></td>
+      <td>{{ o.attempt_count }}/{{ o.max_attempts }}</td>
+      <td>{{ o.next_attempt_at.strftime("%m-%d %H:%M") if o.next_attempt_at else "—" }}</td>
+      <td>{{ o.last_error_message or "—" }}</td>
+      <td>
+        {% if o.status in ("FAILED_RETRYABLE", "PENDING") %}
+        <form class="inline" method="post" action="/admin/deliveries/{{ o.id }}/retry">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit">Retry now</button>
+        </form>
+        {% endif %}
+        {% if o.status != "SENT" %}
+        <form class="inline" method="post" action="/admin/deliveries/{{ o.id }}/skip">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="reason" value="Skipped by admin">
+          <button type="submit">Mark skipped</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="muted">Không có delivery ở trạng thái này.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<nav aria-label="Deliveries pagination">
+  {% if pagination.has_prev %}
+  <a href="/admin/deliveries?tab={{ tab }}&page={{ pagination.prev_page }}&per_page={{ pagination.per_page }}">Trang trước</a>
+  {% endif %}
+  {% if pagination.has_next %}
+  <a href="/admin/deliveries?tab={{ tab }}&page={{ pagination.next_page }}&per_page={{ pagination.per_page }}">Trang sau</a>
+  {% endif %}
+</nav>
+{% endblock %}

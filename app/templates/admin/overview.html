@@ -1,0 +1,93 @@
+{% extends "admin/base.html" %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<h1>Overview</h1>
+<p class="muted">Đăng nhập: {{ username }}</p>
+
+{% if global_status != "OK" %}
+<div class="alert" role="alert">{{ data.next_action }}</div>
+{% if data.runbook %}
+<section class="runbook" aria-labelledby="runbook-title">
+  <h2 id="runbook-title">Cách xử lý</h2>
+  <div class="runbook-grid">
+    {% for item in data.runbook %}
+    <article class="runbook-card">
+      <div class="runbook-head">
+        <h3>{{ item.title }}</h3>
+        <span class="status status-{{ item.severity }}">{{ item.severity }}</span>
+      </div>
+      <p>{{ item.summary }}</p>
+      <ol>
+        {% for step in item.steps %}
+        <li>{{ step }}</li>
+        {% endfor %}
+      </ol>
+      <a href="{{ item.link }}">{{ item.link_label }}</a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% else %}
+<div class="action-panel">{{ data.next_action }}</div>
+{% endif %}
+
+<h2>Trạng thái thành phần</h2>
+<div class="tiles">
+  {% for c in data.components %}
+  <div class="tile">
+    <div class="status status-{{ c.status }}">{{ c.component_code }}: {{ c.status }}</div>
+    <div class="muted">{{ c.summary or "—" }}</div>
+    <div class="muted">Kiểm tra: {{ c.checked_at.strftime("%H:%M:%S") if c.checked_at else "—" }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<h2>Feed freshness</h2>
+<table>
+  <thead><tr><th>Symbol</th><th>Timeframe</th><th>Status</th><th>Last candle</th><th>Age (phút)</th><th>Lỗi</th></tr></thead>
+  <tbody>
+  {% for f in data.feeds %}
+    <tr>
+      <td>{{ f.symbol }}</td><td>{{ f.timeframe }}</td>
+      <td><span class="status status-{{ f.status }}">{{ f.status }}</span></td>
+      <td>{{ f.last_candle_time.strftime("%Y-%m-%d %H:%M") if f.last_candle_time else "—" }}</td>
+      <td>{{ f.age_minutes if f.age_minutes is not none else "—" }}</td>
+      <td>{{ f.last_error or "—" }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6" class="muted">Chưa có feed. Chưa nhận webhook nào.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Delivery queue</h2>
+<p>
+  Pending: {{ data.delivery_summary.pending }} ·
+  Retryable: {{ data.delivery_summary.retryable }} ·
+  Permanent: {{ data.delivery_summary.permanent }} ·
+  Sent: {{ data.delivery_summary.sent }} ·
+  Telegram cuối: {{ data.delivery_summary.last_sent_at.strftime("%Y-%m-%d %H:%M") if data.delivery_summary.last_sent_at else "—" }}
+  · <a href="/admin/deliveries">Xem delivery lỗi</a>
+</p>
+
+<h2>10 signal gần nhất</h2>
+<table>
+  <thead><tr><th>Thời gian</th><th>Symbol/TF</th><th>Strategy</th><th>Action</th><th>Confidence</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for s in data.signals %}
+    <tr>
+      <td>{{ s.created_at.strftime("%m-%d %H:%M") }}</td>
+      <td>{{ s.symbol }} {{ s.timeframe }}</td>
+      <td>{{ s.strategy_code }}</td>
+      <td>{{ s.action }}</td>
+      <td>{{ s.confidence if s.confidence is not none else "—" }}</td>
+      <td><span class="status status-{{ s.status }}">{{ s.status }}</span></td>
+      <td><a href="/admin/signals/{{ s.id }}">Chi tiết</a></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="7" class="muted">Chưa có tín hiệu nào.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
