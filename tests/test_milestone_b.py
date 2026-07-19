@@ -150,3 +150,28 @@ def test_login_wrong_password_401(client):
         follow_redirects=False,
     )
     assert r.status_code == 401
+
+
+def test_login_rate_limited_after_burst(client, monkeypatch):
+    """S1: brute-force from one IP is throttled to 429 once the limit is hit."""
+    import uuid
+
+    from app.config.settings import get_settings
+    from app.services.health import redis_connection
+
+    monkeypatch.setenv("LOGIN_RATE_LIMIT", "3")
+    monkeypatch.setenv("LOGIN_RATE_WINDOW_SECONDS", "300")
+    get_settings.cache_clear()
+    ip = f"9.9.9.{uuid.uuid4().int % 250}"  # unique IP so the counter starts fresh
+    redis_connection(get_settings()).delete(f"login:{ip}")
+
+    client.get("/admin/login")
+    csrf = client.cookies.get("admin_csrf")
+    data = {"username": "admin", "password": "wrong", "csrf_token": csrf}
+    headers = {"X-Forwarded-For": ip}
+
+    for _ in range(3):
+        r = client.post("/admin/login", data=data, headers=headers, follow_redirects=False)
+        assert r.status_code == 401
+    r = client.post("/admin/login", data=data, headers=headers, follow_redirects=False)
+    assert r.status_code == 429

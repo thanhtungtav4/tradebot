@@ -39,10 +39,13 @@ class Settings(BaseSettings):
     admin_password_hash: str = _PLACEHOLDER
     admin_session_secret: str = _PLACEHOLDER
     admin_session_ttl_hours: int = 8
+    login_rate_limit: int = 5
+    login_rate_window_seconds: int = 300
 
     telegram_bot_token: str = _PLACEHOLDER
     telegram_send_timeout_seconds: int = 10
     telegram_health_cache_seconds: int = 300
+    alert_telegram_chat_id: str = ""
 
     tradingview_webhook_token: str = _PLACEHOLDER
     tradingview_body_secret: str = _PLACEHOLDER

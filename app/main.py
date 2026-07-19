@@ -1,6 +1,9 @@
 """FastAPI application factory."""
 
+from pathlib import Path
+
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app.api.admin import api_router as admin_api_router
 from app.api.admin import router as admin_router
@@ -29,6 +32,11 @@ def create_app() -> FastAPI:
     app.include_router(admin_router)
     app.include_router(webhooks_router)
     app.include_router(bridge_router)
+    app.mount(
+        "/static",
+        StaticFiles(directory=str(Path(__file__).parent / "static")),
+        name="static",
+    )
     return app
 
 

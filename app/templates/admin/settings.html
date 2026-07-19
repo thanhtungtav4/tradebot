@@ -1,31 +1,45 @@
 {% extends "admin/base.html" %}
 {% block title %}Settings{% endblock %}
 {% block content %}
-<h1>Settings</h1>
+<h1 class="text-2xl font-bold mb-4">Settings</h1>
 
-<h2>TradingView webhook</h2>
-<ul>
-  <li>URL: <code>/api/v1/webhooks/tradingview/bars/{token}</code></li>
-  <li>Webhook token (masked): <code>{{ webhook_masked }}</code></li>
-  <li>Auth: path token + body <code>secret</code>. HMAC chỉ dành cho MT4/MT5/custom webhook future.</li>
-</ul>
-<p class="muted">Secret không hiển thị đầy đủ sau khi tạo. Rotation cần xác nhận.</p>
+<div class="card bg-base-100 shadow-sm mb-4">
+  <div class="card-body">
+    <h2 class="card-title text-base">TradingView webhook</h2>
+    <ul class="space-y-1 text-sm">
+      <li>URL: <code>/api/v1/webhooks/tradingview/bars/{token}</code></li>
+      <li>Webhook token (masked): <code>{{ webhook_masked }}</code></li>
+      <li>Auth: path token + body <code>secret</code>. HMAC chỉ dành cho MT4/MT5/custom webhook future.</li>
+    </ul>
+    <p class="text-sm text-base-content/60">Secret không hiển thị đầy đủ sau khi tạo. Rotation cần xác nhận.</p>
+  </div>
+</div>
 
-<h2>Active feeds / stale thresholds</h2>
-<p>Stale grace: {{ stale_grace }} phút. M15 stale sau {{ stale_grace + 15 }}m, H1 sau {{ stale_grace + 60 }}m.</p>
-<table>
-  <thead><tr><th>Symbol</th><th>Timeframe</th><th>Stale after</th></tr></thead>
-  <tbody>
-  {% for f in feeds %}
-    <tr><td>{{ f.canonical_symbol }}</td><td>{{ f.timeframe }}</td><td>{{ f.stale_after_minutes }} phút</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
+<div class="card bg-base-100 shadow-sm mb-4">
+  <div class="card-body">
+    <h2 class="card-title text-base">Active feeds / stale thresholds</h2>
+    <p class="text-sm">Stale grace: {{ stale_grace }} phút. M15 stale sau {{ stale_grace + 15 }}m, H1 sau {{ stale_grace + 60 }}m.</p>
+    <div class="overflow-x-auto">
+    <table class="table table-zebra table-sm">
+      <thead><tr><th>Symbol</th><th>Timeframe</th><th>Stale after</th></tr></thead>
+      <tbody>
+      {% for f in feeds %}
+        <tr><td>{{ f.canonical_symbol }}</td><td>{{ f.timeframe }}</td><td>{{ f.stale_after_minutes }} phút</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
 
-<h2>Admin security</h2>
-<ul>
-  <li>Session auth: cookie HttpOnly, SameSite=Lax, TTL 8h.</li>
-  <li>CSRF token bắt buộc cho mọi thao tác thay đổi runtime.</li>
-  <li>Không lưu plain password/secret; DB chỉ lưu hash.</li>
-</ul>
+<div class="card bg-base-100 shadow-sm">
+  <div class="card-body">
+    <h2 class="card-title text-base">Admin security</h2>
+    <ul class="space-y-1 text-sm">
+      <li>Session auth: cookie HttpOnly, SameSite=Lax, TTL 8h.</li>
+      <li>CSRF token bắt buộc cho mọi thao tác thay đổi runtime.</li>
+      <li>Không lưu plain password/secret; DB chỉ lưu hash.</li>
+    </ul>
+  </div>
+</div>
 {% endblock %}

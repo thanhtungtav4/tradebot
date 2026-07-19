@@ -80,6 +80,7 @@ def client(db, monkeypatch):
     monkeypatch.setenv("ADMIN_SESSION_SECRET", "test-session-secret-abcdefghijkl")
     monkeypatch.setenv("TRADINGVIEW_WEBHOOK_TOKEN", TEST_WEBHOOK_TOKEN)
     monkeypatch.setenv("TRADINGVIEW_BODY_SECRET", TEST_BODY_SECRET)
+    monkeypatch.setenv("LOGIN_RATE_LIMIT", "100000")  # don't throttle the test suite
 
     from app.config.settings import get_settings
     from app.db.session import get_db

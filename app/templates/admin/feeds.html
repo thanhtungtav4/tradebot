@@ -1,30 +1,48 @@
 {% extends "admin/base.html" %}
+{% from "admin/_macros.html" import status_badge %}
+{% from "admin/_tv_chart.html" import tv_chart, tv_interval %}
 {% block title %}Feeds{% endblock %}
 {% block content %}
-<h1>Feeds</h1>
-<p class="muted">TradingView không tự backfill lịch sử. Nếu alert bị tắt, bot sẽ thiếu candle cho khoảng thời gian đó.</p>
+<h1 class="text-2xl font-bold mb-1">Feeds</h1>
+<p class="text-sm text-base-content/70 mb-4">TradingView không tự backfill lịch sử. Nếu alert bị tắt, bot sẽ thiếu candle cho khoảng thời gian đó.</p>
 
-<table>
+<div class="overflow-x-auto mb-4">
+<table class="table table-zebra table-sm">
   <thead><tr><th>Symbol</th><th>Source symbol</th><th>TF</th><th>Status</th><th>Last candle</th><th>Age</th><th>Ngưỡng stale</th><th>Lỗi</th></tr></thead>
   <tbody>
   {% for f in feeds %}
     <tr>
-      <td>{{ f.symbol }}</td><td>{{ f.source_symbol }}</td><td>{{ f.timeframe }}</td>
-      <td><span class="status status-{{ f.status }}">{{ f.status }}</span></td>
+      <td>{{ f.symbol }}</td><td><code class="text-xs">{{ f.source_symbol }}</code></td><td>{{ f.timeframe }}</td>
+      <td>{{ status_badge(f.status) }}</td>
       <td>{{ f.last_candle_time.strftime("%Y-%m-%d %H:%M") if f.last_candle_time else "—" }}</td>
       <td>{{ f.age_minutes if f.age_minutes is not none else "—" }} phút</td>
       <td>{{ f.stale_after_minutes }} phút</td>
       <td>{{ f.last_error or "—" }}</td>
     </tr>
   {% else %}
-    <tr><td colspan="8" class="muted">Chưa nhận webhook nào.</td></tr>
+    <tr><td colspan="8" class="text-base-content/60">Chưa nhận webhook nào.</td></tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
 
-<h2>Webhook setup</h2>
-<p class="muted">URL: <code>{{ webhook_url }}</code> (thay <code>{token}</code> bằng TradingView webhook token). Body phải chứa field <code>secret</code>.</p>
-<pre>{
+{% if feeds %}
+<h2 class="text-lg font-semibold mb-2">Biểu đồ TradingView theo feed</h2>
+<div class="space-y-2 mb-6">
+  {% for f in feeds %}
+  <details class="collapse collapse-arrow bg-base-100 border border-base-300 rounded-box">
+    <summary class="collapse-title font-medium">{{ f.symbol }} {{ f.timeframe }} <span class="text-xs text-base-content/50">({{ f.source_symbol }})</span></summary>
+    <div class="collapse-content">
+      {{ tv_chart(f.source_symbol, tv_interval(f.timeframe)) }}
+    </div>
+  </details>
+  {% endfor %}
+</div>
+{% endif %}
+
+<h2 class="text-lg font-semibold mb-2">Webhook setup</h2>
+<p class="text-sm text-base-content/70 mb-2">URL: <code>{{ webhook_url }}</code> (thay <code>{token}</code> bằng TradingView webhook token). Body phải chứa field <code>secret</code>.</p>
+<pre class="bg-base-300 rounded-box p-4 text-xs overflow-x-auto">{
   "secret": "&lt;body_secret&gt;",
   "source": "TRADINGVIEW",
   "symbol": "OANDA:XAUUSD",

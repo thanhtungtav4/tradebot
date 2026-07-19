@@ -11,6 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models import MarketCandle, SignalEvent, SymbolSetting
+from app.services.execution import maybe_generate_execution_ticket
 from app.models.signals import Signal as SignalModel
 from app.strategy.indicators import session_label
 from app.strategy.liquidity_sweep import InsufficientTrendData
@@ -143,7 +144,10 @@ def run_strategy(db: Session, *, symbol: str, timeframe: str, source_id: int, st
     if ai_review.telegram_reason:
         candidate.metadata["telegram_reason"] = ai_review.telegram_reason
 
-    return _persist_signal(db, candidate, uid, source_id, status="APPROVED")
+    sig = _persist_signal(db, candidate, uid, source_id, status="APPROVED")
+    if sig and sig.status == "APPROVED":
+        maybe_generate_execution_ticket(db, sig)
+    return sig
 
 
 def _persist_signal(db: Session, candidate: SignalCandidate, uid: str, source_id: int, *, status: str, reject_code: str | None = None) -> SignalModel | None:
@@ -176,9 +180,4 @@ def _persist_signal(db: Session, candidate: SignalCandidate, uid: str, source_id
         _add_event(db, sig.id, EventType.SIGNAL_REJECTED, f"Rejected: {reject_code}", {"rejectCode": reject_code})
     else:
         _add_event(db, sig.id, EventType.SIGNAL_APPROVED, "Passed global risk + duplicate guard")
-        
-        # Generate execution ticket (Phase Future F)
-        from app.services.execution import generate_execution_ticket
-        generate_execution_ticket(db, sig)
-        
     return sig

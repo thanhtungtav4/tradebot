@@ -65,6 +65,23 @@ def calculate_trade_volume(
     return volume
 
 
+def maybe_generate_execution_ticket(db: Session, signal: Signal) -> dict:
+    """Post-approve hook: generate a ticket only if a broker connector is active.
+
+    Keeps auto-trade a separate concern from the signal engine (spec §6). When no
+    MT4/MT5 source is active (MVP default), this is a no-op returning {}.
+    """
+    source = db.scalar(
+        select(DataSource).where(
+            DataSource.type.in_(["MT4_BRIDGE", "MT5_CONNECTOR"]),
+            DataSource.is_active.is_(True),
+        )
+    )
+    if source is None:
+        return {}
+    return generate_execution_ticket(db, signal)
+
+
 def generate_execution_ticket(db: Session, signal: Signal) -> dict:
     """Generate and store trade execution ticket for MT4/MT5 bridge consumption."""
     # Find active broker datasource matching symbol or type

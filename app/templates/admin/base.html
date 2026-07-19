@@ -1,61 +1,32 @@
 <!doctype html>
-<html lang="vi">
+<html lang="vi" data-theme="corporate">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Admin{% endblock %} - tradebot</title>
-  <style>
-    :root { --ok:#0a7d2c; --degraded:#8a6d00; --down:#b00020; --paused:#555; --border:#ccc; }
-    * { box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; margin: 0; color: #111; line-height: 1.4; }
-    header { display: flex; align-items: center; gap: 1rem; padding: .6rem 1rem;
-      border-bottom: 2px solid var(--border); background: #f7f7f7; flex-wrap: wrap; }
-    .badge { font-weight: 700; padding: .15rem .5rem; border: 1px solid #333; border-radius: 4px; font-size: .8rem; }
-    nav a { margin-right: .8rem; text-decoration: none; color: #06c; }
-    nav a[aria-current="page"] { font-weight: 700; text-decoration: underline; }
-    main { padding: 1rem; max-width: 1100px; }
-    table { border-collapse: collapse; width: 100%; margin: .5rem 0; }
-    th, td { border: 1px solid var(--border); padding: .4rem .5rem; text-align: left; }
-    th { background: #f0f0f0; }
-    .status { font-weight: 700; padding: .1rem .4rem; border-radius: 3px; border: 1px solid; }
-    .status-OK { color: var(--ok); border-color: var(--ok); }
-    .status-DEGRADED, .status-STALE, .status-WARMUP { color: var(--degraded); border-color: var(--degraded); }
-    .status-DOWN, .status-ERROR, .status-FAILED_PERMANENT, .status-FAILED_RETRYABLE { color: var(--down); border-color: var(--down); }
-    .status-PAUSED, .status-UNKNOWN, .status-PENDING { color: var(--paused); border-color: var(--paused); }
-    .tiles { display: flex; gap: .5rem; flex-wrap: wrap; }
-    .tile { border: 1px solid var(--border); border-radius: 6px; padding: .6rem; min-width: 150px; }
-    .alert { border: 2px solid var(--down); background: #fff3f3; padding: .6rem; border-radius: 6px; margin: .5rem 0; }
-    .action-panel { border: 1px solid var(--border); background: #f5f8ff; padding: .6rem; border-radius: 6px; }
-    .runbook { margin: 1rem 0; }
-    .runbook-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: .75rem; }
-    .runbook-card { border: 1px solid var(--border); border-left: 4px solid var(--degraded); border-radius: 6px; padding: .75rem; background: #fffdf5; }
-    .runbook-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
-    .runbook-card h3 { margin: 0; font-size: 1rem; }
-    .runbook-card p { margin: .5rem 0; }
-    .runbook-card ol { margin: .5rem 0 .75rem 1.25rem; padding: 0; }
-    .runbook-card li { margin: .25rem 0; }
-    button, input, select { min-height: 44px; font-size: 1rem; }
-    a:focus, button:focus, input:focus, select:focus { outline: 3px solid #06c; outline-offset: 1px; }
-    form.inline { display: inline; }
-    .muted { color: #666; font-size: .85rem; }
-  </style>
+  <link rel="stylesheet" href="/static/css/app.css">
 </head>
-<body>
-  <header>
-    <span class="badge">{{ env }}</span>
-    <span class="status status-{{ global_status }}">Trạng thái: {{ global_status }}</span>
-    <nav aria-label="Chính">
+<body class="min-h-screen bg-base-200 text-base-content">
+  {% from "admin/_macros.html" import status_badge %}
+  <header class="navbar bg-base-100 border-b border-base-300 gap-3 px-4 flex-wrap">
+    <span class="badge badge-outline badge-lg font-bold">{{ env }}</span>
+    {{ status_badge(global_status) }}
+    <span class="text-sm text-base-content/60">Trạng thái</span>
+    <nav aria-label="Chính" class="ml-2">
+      <ul class="menu menu-horizontal gap-1 p-0">
       {% set sections = [("/admin","Overview"),("/admin/feeds","Feeds"),("/admin/groups","Groups"),("/admin/strategies","Strategies"),("/admin/signals","Signals"),("/admin/deliveries","Deliveries"),("/admin/settings","Settings")] %}
       {% for href, label in sections %}
-        <a href="{{ href }}"{% if section == label %} aria-current="page"{% endif %}>{{ label }}</a>
+        <li><a href="{{ href }}" class="{% if section == label %}menu-active font-bold{% endif %}"{% if section == label %} aria-current="page"{% endif %}>{{ label }}</a></li>
       {% endfor %}
+      </ul>
     </nav>
-    <form class="inline" method="post" action="/admin/logout" style="margin-left:auto">
+    <form method="post" action="/admin/logout" class="ml-auto">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <button type="submit">Đăng xuất</button>
+      <button type="submit" class="btn btn-sm btn-ghost">Đăng xuất</button>
     </form>
   </header>
-  <main>
+
+  <main class="p-4 max-w-6xl mx-auto">
     {% block content %}{% endblock %}
   </main>
 </body>

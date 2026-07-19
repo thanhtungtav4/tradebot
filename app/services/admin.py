@@ -287,7 +287,15 @@ def signal_detail(db: Session, signal_id: int) -> dict | None:
     deliveries = db.scalars(
         select(SignalDelivery).where(SignalDelivery.signal_id == signal_id).order_by(SignalDelivery.attempt_no)
     ).all()
-    return {"signal": sig, "events": events, "outboxes": outboxes, "deliveries": deliveries}
+    # Broker symbol for the TradingView chart widget; fall back to canonical in template.
+    source_symbol = db.scalar(
+        select(DataSourceFeed.source_symbol).where(
+            DataSourceFeed.canonical_symbol == sig.symbol,
+            DataSourceFeed.timeframe == sig.timeframe,
+        ).limit(1)
+    )
+    return {"signal": sig, "events": events, "outboxes": outboxes,
+            "deliveries": deliveries, "source_symbol": source_symbol}
 
 
 def deliveries_by_status(

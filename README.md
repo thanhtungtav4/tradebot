@@ -11,7 +11,7 @@ Full local run guide: [docs/RUNNING_PROJECT.md](/Volumes/Manager%20Data/Tool/tra
 - Python 3.12 + FastAPI
 - SQLAlchemy 2.x + Alembic (PostgreSQL 16, no SQLite for integration)
 - Redis 7 + RQ (workers, scheduler)
-- Admin Console: Jinja2 + HTMX
+- Admin Console: Jinja2 + HTMX + Tailwind CSS + DaisyUI (Tailwind standalone CLI, no Node), TradingView Advanced Chart widget
 - uv for dependency management
 
 ## Docker
@@ -26,6 +26,7 @@ make install                 # uv sync
 make dev-services-up         # docker compose: postgres + redis
 make migrate                 # alembic upgrade head
 make seed                    # deterministic MVP config (repeat-safe)
+make css                     # build admin CSS (downloads Tailwind CLI + DaisyUI on first run)
 make api                     # uvicorn on :8000
 # open http://localhost:8000/api/v1/health
 ```

@@ -254,9 +254,17 @@ def collect_health(db: Session, *, persist: bool = True) -> tuple[str, dict[str,
         by_code.setdefault(code, ComponentCheck(code, "UNKNOWN", "Not checked", {}))
 
     if persist:
+        old_status = {
+            row.component_code: row.status
+            for row in db.scalars(select(ComponentHealth)).all()
+        }
         for check in by_code.values():
             upsert_component_health(db, check)
         db.commit()
+        from app.services import alerts
+        alerts.notify_degraded(
+            alerts.newly_degraded(old_status, {c: chk.status for c, chk in by_code.items()})
+        )
 
     statuses = [check.status for check in by_code.values()]
     if "DOWN" in statuses:

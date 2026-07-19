@@ -26,8 +26,10 @@ from app.models import (
 from app.api.errors import error_response
 from app.schemas.tradingview import CandleImportPayload
 from app.security.auth import require_api_key
+from app.security import rate_limit
 from app.security.secrets import constant_time_equals, verify_password
 from app.security.session import COOKIE_NAME, issue_session, read_session
+from app.services.health import redis_connection
 from app.security.session_dep import require_session
 from app.services import admin as admin_svc
 from app.services import delivery
@@ -67,8 +69,16 @@ def _check_csrf(request: Request, csrf_token: str) -> bool:
     return session is not None and constant_time_equals(csrf_token, session.get("csrf", ""))
 
 
+def _client_ip(request: Request) -> str | None:
+    """Real client IP behind nginx: first X-Forwarded-For hop, else socket peer."""
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.client.host if request.client else None
+
+
 def _audit_meta(request: Request) -> dict:
-    return {"ip": request.client.host if request.client else None,
+    return {"ip": _client_ip(request),
             "user_agent": request.headers.get("user-agent")}
 
 
@@ -93,6 +103,13 @@ def login_submit(
     csrf_token: str = Form(...),
     settings: Settings = Depends(get_settings),
 ):
+    ip = _client_ip(request) or "unknown"
+    if not rate_limit.check(
+        redis_connection(settings), f"login:{ip}",
+        limit=settings.login_rate_limit, window_seconds=settings.login_rate_window_seconds,
+    ):
+        return _login_error(request, "Too many attempts. Try again later.", status_code=429)
+
     cookie_csrf = request.cookies.get(_CSRF_COOKIE, "")
     if not cookie_csrf or not constant_time_equals(csrf_token, cookie_csrf):
         return _login_error(request, "Invalid CSRF token")
@@ -107,10 +124,10 @@ def login_submit(
     return resp
 
 
-def _login_error(request: Request, message: str) -> HTMLResponse:
+def _login_error(request: Request, message: str, status_code: int = 401) -> HTMLResponse:
     csrf = secrets.token_urlsafe(32)
     resp = templates.TemplateResponse(
-        request, "admin/login.html", {"csrf_token": csrf, "error": message}, status_code=401
+        request, "admin/login.html", {"csrf_token": csrf, "error": message}, status_code=status_code
     )
     resp.set_cookie(_CSRF_COOKIE, csrf, httponly=True, samesite="lax", max_age=600)
     return resp

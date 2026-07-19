@@ -1,11 +1,12 @@
 {% extends "admin/base.html" %}
 {% block title %}Strategies{% endblock %}
 {% block content %}
-<h1>Strategies</h1>
-<p class="muted">Cấu hình theo group chỉ ảnh hưởng routing/eligibility, KHÔNG ảnh hưởng logic detect global của strategy.</p>
+<h1 class="text-2xl font-bold mb-1">Strategies</h1>
+<p class="text-sm text-base-content/70 mb-4">Cấu hình theo group chỉ ảnh hưởng routing/eligibility, KHÔNG ảnh hưởng logic detect global của strategy.</p>
 
-<h2>Strategy registry</h2>
-<table>
+<h2 class="text-lg font-semibold mb-2">Strategy registry</h2>
+<div class="overflow-x-auto mb-6">
+<table class="table table-zebra table-sm">
   <thead><tr><th>Code</th><th>Tên</th><th>Version</th><th>Active</th></tr></thead>
   <tbody>
   {% for s in strategies %}
@@ -14,9 +15,11 @@
   {% endfor %}
   </tbody>
 </table>
+</div>
 
-<h2>Group strategy settings</h2>
-<table>
+<h2 class="text-lg font-semibold mb-2">Group strategy settings</h2>
+<div class="overflow-x-auto">
+<table class="table table-sm align-top">
   <thead><tr><th>Setting</th><th>Group</th><th>Routing config</th><th>Symbols</th><th>Timeframes</th><th>Active</th><th>Thao tác</th></tr></thead>
   <tbody>
   {% for row in settings %}
@@ -25,46 +28,51 @@
       <td>{{ gs.setting_code }}</td>
       <td>{{ row.group_name }} (#{{ gs.group_id }})</td>
       <td>
-        <form method="post" action="/admin/strategies/settings/{{ gs.id }}">
+        <form method="post" action="/admin/strategies/settings/{{ gs.id }}" class="space-y-2">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <label>Min confidence<br>
-            <input name="min_confidence" type="number" min="0" max="100" value="{{ gs.min_confidence }}" required>
-          </label><br>
-          <label>Send mode<br>
-            <select name="send_mode" required>
+          <label class="form-control">
+            <span class="label-text text-xs">Min confidence</span>
+            <input name="min_confidence" type="number" min="0" max="100" value="{{ gs.min_confidence }}" required class="input input-bordered input-sm w-28">
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">Send mode</span>
+            <select name="send_mode" required class="select select-bordered select-sm w-32">
               {% for mode in send_modes %}
               <option value="{{ mode }}"{% if gs.send_mode == mode %} selected{% endif %}>{{ mode }}</option>
               {% endfor %}
             </select>
-          </label><br>
-          <label>Cooldown phút<br>
-            <input name="cooldown_minutes" type="number" min="0" value="{{ gs.cooldown_minutes }}" required>
-          </label><br>
-          <label>Min RR<br>
-            <input name="min_rr" type="number" min="0.1" step="0.1" value="{{ gs.min_rr }}" required>
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">Cooldown phút</span>
+            <input name="cooldown_minutes" type="number" min="0" value="{{ gs.cooldown_minutes }}" required class="input input-bordered input-sm w-28">
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">Min RR</span>
+            <input name="min_rr" type="number" min="0.1" step="0.1" value="{{ gs.min_rr }}" required class="input input-bordered input-sm w-28">
           </label>
       </td>
       <td>
           {% for symbol in symbols %}
-          <label><input name="symbols" type="checkbox" value="{{ symbol }}"{% if symbol in row.symbols %} checked{% endif %}> {{ symbol }}</label><br>
+          <label class="label cursor-pointer justify-start gap-2 py-0.5"><input name="symbols" type="checkbox" value="{{ symbol }}"{% if symbol in row.symbols %} checked{% endif %} class="checkbox checkbox-sm"> <span class="label-text">{{ symbol }}</span></label>
           {% endfor %}
       </td>
       <td>
           {% for tf in timeframes %}
-          <label><input name="timeframes" type="checkbox" value="{{ tf }}"{% if tf in row.timeframes %} checked{% endif %}> {{ tf }}</label><br>
+          <label class="label cursor-pointer justify-start gap-2 py-0.5"><input name="timeframes" type="checkbox" value="{{ tf }}"{% if tf in row.timeframes %} checked{% endif %} class="checkbox checkbox-sm"> <span class="label-text">{{ tf }}</span></label>
           {% endfor %}
       </td>
       <td>
-          <label><input name="is_active" type="checkbox"{% if gs.is_active %} checked{% endif %}> Active</label>
+          <label class="label cursor-pointer justify-start gap-2"><input name="is_active" type="checkbox"{% if gs.is_active %} checked{% endif %} class="checkbox checkbox-sm"> <span class="label-text">Active</span></label>
       </td>
       <td>
-          <button type="submit">Lưu setting</button>
+          <button type="submit" class="btn btn-sm btn-primary">Lưu setting</button>
         </form>
       </td>
     </tr>
   {% else %}
-    <tr><td colspan="7" class="muted">Chưa có group strategy setting.</td></tr>
+    <tr><td colspan="7" class="text-base-content/60">Chưa có group strategy setting.</td></tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% endblock %}

@@ -1,9 +1,11 @@
 {% extends "admin/base.html" %}
+{% from "admin/_macros.html" import status_badge %}
 {% block title %}Signals{% endblock %}
 {% block content %}
-<h1>Signals</h1>
-<p class="muted">Tổng: {{ pagination.total }} · Trang {{ pagination.page }}/{{ pagination.pages }}</p>
-<table>
+<h1 class="text-2xl font-bold mb-1">Signals</h1>
+<p class="text-sm text-base-content/70 mb-3">Tổng: {{ pagination.total }} · Trang {{ pagination.page }}/{{ pagination.pages }}</p>
+<div class="overflow-x-auto">
+<table class="table table-zebra table-sm">
   <thead><tr><th>Created</th><th>Symbol/TF</th><th>Strategy</th><th>Action</th><th>Entry</th><th>SL</th><th>RR</th><th>Conf</th><th>Status</th><th></th></tr></thead>
   <tbody>
   {% for s in signals %}
@@ -13,20 +15,21 @@
       <td>{{ s.strategy_code }}</td><td>{{ s.action }}</td>
       <td>{{ s.entry or "—" }}</td><td>{{ s.sl or "—" }}</td>
       <td>{{ s.risk_reward or "—" }}</td><td>{{ s.confidence if s.confidence is not none else "—" }}</td>
-      <td><span class="status status-{{ s.status }}">{{ s.status }}</span></td>
-      <td><a href="/admin/signals/{{ s.id }}">Chi tiết</a></td>
+      <td>{{ status_badge(s.status) }}</td>
+      <td><a href="/admin/signals/{{ s.id }}" class="link link-primary">Chi tiết</a></td>
     </tr>
   {% else %}
-    <tr><td colspan="10" class="muted">Chưa có tín hiệu nào. Khi TradingView gửi đủ candle và strategy phát hiện setup, tín hiệu sẽ xuất hiện ở đây.</td></tr>
+    <tr><td colspan="10" class="text-base-content/60">Chưa có tín hiệu nào. Khi TradingView gửi đủ candle và strategy phát hiện setup, tín hiệu sẽ xuất hiện ở đây.</td></tr>
   {% endfor %}
   </tbody>
 </table>
-<nav aria-label="Signals pagination">
+</div>
+<nav aria-label="Signals pagination" class="join mt-4">
   {% if pagination.has_prev %}
-  <a href="/admin/signals?page={{ pagination.prev_page }}&per_page={{ pagination.per_page }}">Trang trước</a>
+  <a class="join-item btn btn-sm" href="/admin/signals?page={{ pagination.prev_page }}&per_page={{ pagination.per_page }}">Trang trước</a>
   {% endif %}
   {% if pagination.has_next %}
-  <a href="/admin/signals?page={{ pagination.next_page }}&per_page={{ pagination.per_page }}">Trang sau</a>
+  <a class="join-item btn btn-sm" href="/admin/signals?page={{ pagination.next_page }}&per_page={{ pagination.per_page }}">Trang sau</a>
   {% endif %}
 </nav>
 {% endblock %}

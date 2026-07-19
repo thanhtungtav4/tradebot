@@ -1,0 +1,36 @@
+{#- TradingView Advanced Chart widget.
+    symbol: broker symbol e.g. "OANDA:XAUUSD" (feed.source_symbol).
+    interval: TradingView interval string ("15", "60"...). -#}
+{% macro tv_chart(symbol, interval, height=420) -%}
+<div class="rounded-box overflow-hidden border border-base-300" style="height:{{ height }}px">
+  <div class="tradingview-widget-container" style="height:100%;width:100%">
+    <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+    <script type="text/javascript"
+      src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+    {
+      "autosize": true,
+      "symbol": {{ symbol | tojson }},
+      "interval": {{ interval | tojson }},
+      "timezone": "Etc/UTC",
+      "theme": "light",
+      "style": "1",
+      "locale": "vi_VN",
+      "allow_symbol_change": false,
+      "hide_side_toolbar": true
+    }
+    </script>
+  </div>
+</div>
+{%- endmacro %}
+
+{#- map bot timeframe (M15/H1...) -> TradingView interval -#}
+{% macro tv_interval(timeframe) -%}
+  {%- if timeframe == "M1" -%}1
+  {%- elif timeframe == "M5" -%}5
+  {%- elif timeframe == "M15" -%}15
+  {%- elif timeframe == "M30" -%}30
+  {%- elif timeframe == "H1" -%}60
+  {%- elif timeframe == "H4" -%}240
+  {%- elif timeframe == "D1" -%}D
+  {%- else -%}60{%- endif -%}
+{%- endmacro %}

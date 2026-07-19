@@ -23,6 +23,14 @@ Admin Console là một phần của MVP. Không được chỉ có API/config/s
 
 ## 3. Recommended implementation
 
+> **UI stack revision (2026-07-19):** Admin Console UI đã được refactor sang
+> Tailwind CSS + DaisyUI (qua Tailwind standalone CLI, không thêm Node), và
+> nhúng TradingView Advanced Chart widget vào Signal detail + Feeds. Đây là
+> quyết định đã duyệt, lệch default gốc bên dưới. Xem
+> `docs/superpowers/specs/2026-07-19-admin-ui-tailwind-daisyui-chart-design.md`.
+> Nội dung §3 bên dưới giữ lại làm bối cảnh gốc.
+
+
 MVP nên dùng một trong hai hướng, ưu tiên hướng đơn giản:
 
 1. FastAPI server-rendered Admin Console bằng Jinja2 + HTMX + CSS nội bộ.

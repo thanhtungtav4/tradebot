@@ -2,10 +2,17 @@ export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
 .PHONY: install dev-services-up dev-services-down migrate seed api \
 	worker-market worker-signal worker-telegram worker-maintenance \
-	schedule-jobs scheduler test test-integration smoke release-check lint
+	schedule-jobs scheduler test test-integration smoke release-check lint \
+	css css-watch
 
 install:
 	uv sync
+
+css:
+	bash scripts/tailwind.sh build
+
+css-watch:
+	bash scripts/tailwind.sh watch
 
 dev-services-up:
 	docker compose up -d

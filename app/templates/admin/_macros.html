@@ -1,0 +1,10 @@
+{#- status code -> daisyUI badge; icon+label+text, never color-only (spec §15) -#}
+{% macro status_badge(code) -%}
+  {%- set warn = ["DEGRADED","STALE","WARMUP","PENDING"] -%}
+  {%- set err = ["DOWN","ERROR","FAILED","FAILED_PERMANENT","FAILED_RETRYABLE"] -%}
+  {%- if code == "OK" -%}{% set cls = "badge-success" %}{% set icon = "✓" %}
+  {%- elif code in warn -%}{% set cls = "badge-warning" %}{% set icon = "!" %}
+  {%- elif code in err -%}{% set cls = "badge-error" %}{% set icon = "✕" %}
+  {%- else -%}{% set cls = "badge-neutral" %}{% set icon = "•" %}{%- endif -%}
+  <span class="badge {{ cls }} gap-1 font-semibold whitespace-nowrap"><span aria-hidden="true">{{ icon }}</span>{{ code }}</span>
+{%- endmacro %}
