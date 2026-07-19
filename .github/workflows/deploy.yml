@@ -1,0 +1,33 @@
+name: Deploy
+
+# Deploy to the VPS after CI passes on main.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Only deploy if CI succeeded.
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            export PATH=$HOME/.local/bin:$PATH
+            cd /home/tradebot/app
+            git fetch origin main
+            git reset --hard origin/main
+            uv sync --frozen
+            uv run alembic upgrade head
+            uv run python -m app.seed
+            sudo systemctl restart tradebot-api tradebot-worker-market tradebot-worker-signal tradebot-worker-telegram tradebot-worker-maintenance tradebot-scheduler
+            sleep 3
+            curl -fsS http://127.0.0.1:8000/api/v1/health/ready
