@@ -75,9 +75,9 @@ def test_admin_lists_render_pagination(logged_in_client):
     deliveries = logged_in_client.get("/admin/deliveries?tab=PENDING&page=1&per_page=10")
 
     assert signals.status_code == 200
-    assert "Trang 1/" in signals.text
+    assert "trang 1/" in signals.text
     assert deliveries.status_code == 200
-    assert "Trang 1/" in deliveries.text
+    assert "trang 1/" in deliveries.text
 
 
 # --- write actions + audit ---

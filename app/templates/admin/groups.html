@@ -1,74 +1,84 @@
 {% extends "admin/base.html" %}
+{% from "admin/_macros.html" import status_badge %}
 {% block title %}Groups{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-3">Groups</h1>
-
-<div class="overflow-x-auto mb-8">
-<table class="table table-zebra table-sm">
-  <thead><tr><th>Tên</th><th>Type</th><th>Mode</th><th>Active</th><th>Paused</th><th>Chat id</th><th>Last sent</th><th>Last status</th><th>Ghi chú</th><th>Thao tác</th></tr></thead>
-  <tbody>
-  {% for g in groups %}
-    <tr>
-      <td>{{ g.name }}</td>
-      <td><span class="badge badge-outline">{{ g.type }}</span></td>
-      <td>{{ g.mode }}</td>
-      <td>{{ "Có" if g.is_active else "Không" }}</td>
-      <td>{{ "Có" if g.is_paused else "Không" }}</td>
-      <td>{{ g.telegram_chat_id }}</td>
-      <td>{{ g.last_sent_at.strftime("%m-%d %H:%M") if g.last_sent_at else "—" }}</td>
-      <td>{{ g.last_delivery_status or "—" }}</td>
-      <td>{{ g.notes or "—" }}</td>
-      <td>
-        <div class="flex flex-wrap gap-1">
-        <form method="post" action="/admin/groups/{{ g.id }}/test">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button type="submit" class="btn btn-xs">Test message</button>
-        </form>
-        {% if g.mode != "LIVE" or not g.is_active %}
-        <form method="post" action="/admin/groups/{{ g.id }}/activate-live">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button type="submit" class="btn btn-xs btn-warning">Bật LIVE</button>
-        </form>
-        {% endif %}
-        <form method="post" action="/admin/groups/{{ g.id }}/toggle">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button type="submit" class="btn btn-xs btn-ghost">{{ "Resume" if g.is_paused else "Pause" }}</button>
-        </form>
-        </div>
-      </td>
-    </tr>
-  {% else %}
-    <tr><td colspan="10" class="text-base-content/60">Chưa có group nào.</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
+<div class="flex flex-wrap items-baseline justify-between gap-2 mb-4">
+  <h1 class="text-2xl font-bold tracking-tight">Groups</h1>
+  <span class="text-sm text-base-content/50">{{ groups|length }} nhóm</span>
 </div>
 
-<div class="card bg-base-100 shadow-sm max-w-lg">
-  <div class="card-body">
-    <h2 class="card-title text-base">Thêm group (demo, inactive)</h2>
-    <form method="post" action="/admin/groups" class="space-y-3">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <div class="form-control">
-        <label class="label" for="g-name"><span class="label-text">Tên group (3-100 ký tự)</span></label>
-        <input id="g-name" name="name" minlength="3" maxlength="100" required class="input input-bordered w-full">
+{# ---- Card grid: works on mobile and desktop, no horizontal scroll ---- #}
+<div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 mb-8">
+{% for g in groups %}
+  <article class="rounded-xl border border-base-300 bg-base-100 p-4 flex flex-col gap-3">
+    <div class="flex items-start justify-between gap-2">
+      <div class="min-w-0">
+        <h2 class="font-semibold truncate">{{ g.name }}</h2>
+        <div class="flex items-center gap-1.5 mt-1">
+          <span class="badge badge-sm badge-outline">{{ g.type }}</span>
+          <span class="badge badge-sm {{ 'badge-success' if g.mode == 'LIVE' else 'badge-ghost' }}">{{ g.mode }}</span>
+          {% if g.is_paused %}<span class="badge badge-sm badge-warning">Paused</span>{% endif %}
+          {% if not g.is_active %}<span class="badge badge-sm badge-ghost">Inactive</span>{% endif %}
+        </div>
       </div>
-      <div class="form-control">
-        <label class="label" for="g-type"><span class="label-text">Type</span></label>
-        <select id="g-type" name="type" required class="select select-bordered w-full">
-          <option value="FREE">FREE</option>
-          <option value="VIP">VIP</option>
-          <option value="SMC">SMC</option>
-          <option value="INTERNAL">INTERNAL</option>
-        </select>
-      </div>
-      <p class="text-sm text-base-content/60">Add bot vào group, gửi một tin bất kỳ, sau đó nhập chat id.</p>
-      <div class="form-control">
-        <label class="label" for="g-chat"><span class="label-text">Telegram chat id</span></label>
-        <input id="g-chat" name="telegram_chat_id" required class="input input-bordered w-full">
-      </div>
-      <button type="submit" class="btn btn-primary">Lưu (giữ demo, inactive)</button>
-    </form>
-  </div>
+      {% if g.last_delivery_status %}{{ status_badge(g.last_delivery_status) }}{% endif %}
+    </div>
+
+    <dl class="text-xs text-base-content/60 space-y-0.5">
+      <div class="flex gap-1"><dt class="w-20 shrink-0">Chat id:</dt>
+        <dd class="font-mono truncate">{{ g.telegram_chat_id }}</dd></div>
+      <div class="flex gap-1"><dt class="w-20 shrink-0">Gửi cuối:</dt>
+        <dd class="tabular-nums">{{ g.last_sent_at.strftime("%m-%d %H:%M") if g.last_sent_at else "—" }}</dd></div>
+      {% if g.notes %}<div class="flex gap-1"><dt class="w-20 shrink-0">Ghi chú:</dt><dd>{{ g.notes }}</dd></div>{% endif %}
+    </dl>
+
+    <div class="flex flex-wrap gap-1.5 mt-auto pt-1">
+      <form method="post" action="/admin/groups/{{ g.id }}/test">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="btn btn-xs btn-primary">Test message</button>
+      </form>
+      {% if g.mode != "LIVE" or not g.is_active %}
+      <form method="post" action="/admin/groups/{{ g.id }}/activate-live"
+            onsubmit="return confirm('Bật LIVE cho {{ g.name }}? Group sẽ nhận tín hiệu thật.')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="btn btn-xs btn-warning">Bật LIVE</button>
+      </form>
+      {% endif %}
+      <form method="post" action="/admin/groups/{{ g.id }}/toggle">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="btn btn-xs btn-ghost">{{ "Resume" if g.is_paused else "Pause" }}</button>
+      </form>
+    </div>
+  </article>
+{% else %}
+  <div class="sm:col-span-2 xl:col-span-3 rounded-xl border border-dashed border-base-300 bg-base-100
+              text-center text-base-content/50 py-12">Chưa có group nào. Thêm group demo bên dưới.</div>
+{% endfor %}
+</div>
+
+{# ---- Add group form ---- #}
+<div class="rounded-xl border border-base-300 bg-base-100 p-5 max-w-lg">
+  <h2 class="font-semibold mb-1">Thêm group</h2>
+  <p class="text-xs text-base-content/50 mb-4">Tạo ở chế độ demo, inactive. Add bot vào group, gửi một tin bất kỳ, rồi nhập chat id.</p>
+  <form method="post" action="/admin/groups" class="space-y-3">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="form-control w-full">
+      <span class="label-text text-sm mb-1">Tên group <span class="text-base-content/40">(3–100 ký tự)</span></span>
+      <input name="name" minlength="3" maxlength="100" required class="input input-bordered w-full"
+             placeholder="Forex VIP Signals">
+    </label>
+    <label class="form-control w-full">
+      <span class="label-text text-sm mb-1">Loại</span>
+      <select name="type" required class="select select-bordered w-full">
+        <option value="FREE">FREE</option><option value="VIP">VIP</option>
+        <option value="SMC">SMC</option><option value="INTERNAL">INTERNAL</option>
+      </select>
+    </label>
+    <label class="form-control w-full">
+      <span class="label-text text-sm mb-1">Telegram chat id</span>
+      <input name="telegram_chat_id" required class="input input-bordered w-full font-mono" placeholder="-1001234567890">
+    </label>
+    <button type="submit" class="btn btn-primary w-full">Lưu (demo, inactive)</button>
+  </form>
 </div>
 {% endblock %}

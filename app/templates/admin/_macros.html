@@ -1,10 +1,51 @@
-{#- status code -> daisyUI badge; icon+label+text, never color-only (spec §15) -#}
+{#- status code -> daisyUI badge with SVG icon + label. Never color-only (spec §15). -#}
 {% macro status_badge(code) -%}
-  {%- set warn = ["DEGRADED","STALE","WARMUP","PENDING"] -%}
-  {%- set err = ["DOWN","ERROR","FAILED","FAILED_PERMANENT","FAILED_RETRYABLE"] -%}
-  {%- if code == "OK" -%}{% set cls = "badge-success" %}{% set icon = "✓" %}
-  {%- elif code in warn -%}{% set cls = "badge-warning" %}{% set icon = "!" %}
-  {%- elif code in err -%}{% set cls = "badge-error" %}{% set icon = "✕" %}
-  {%- else -%}{% set cls = "badge-neutral" %}{% set icon = "•" %}{%- endif -%}
-  <span class="badge {{ cls }} gap-1 font-semibold whitespace-nowrap"><span aria-hidden="true">{{ icon }}</span>{{ code }}</span>
+  {%- set warn = ["DEGRADED","STALE","WARMUP","PENDING","PARTIAL_SENT","PARTIAL_FAILED"] -%}
+  {%- set err = ["DOWN","ERROR","FAILED","FAILED_PERMANENT","FAILED_RETRYABLE","REJECTED"] -%}
+  {%- set good = ["OK","SENT","APPROVED","QUEUED"] -%}
+  {%- if code in good -%}
+    {%- set cls = "badge-success" -%}
+    {%- set path = "M4.5 12.75l6 6 9-13.5" -%}
+  {%- elif code in warn -%}
+    {%- set cls = "badge-warning" -%}
+    {%- set path = "M12 9v3.75m0 3.75h.007M10.36 3.34l-8.4 14.55A1.5 1.5 0 003.26 20h17.48a1.5 1.5 0 001.3-2.11L13.64 3.34a1.5 1.5 0 00-2.6 0z" -%}
+  {%- elif code in err -%}
+    {%- set cls = "badge-error" -%}
+    {%- set path = "M6 18L18 6M6 6l12 12" -%}
+  {%- else -%}
+    {%- set cls = "badge-neutral" -%}
+    {%- set path = "M12 6v12m6-6H6" -%}
+  {%- endif -%}
+  <span class="badge {{ cls }} badge-sm gap-1 font-semibold whitespace-nowrap">
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24"
+         stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="{{ path }}"/></svg>{{ code }}
+  </span>
+{%- endmacro %}
+
+{#- Sidebar nav icons (24x24 line icons). -#}
+{% macro nav_icon(name) -%}
+  {%- set icons = {
+    "grid": "M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 018.25 20.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25A2.25 2.25 0 0113.5 8.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z",
+    "activity": "M3 12h4l3 8 4-16 3 8h4",
+    "users": "M15 19.5a6 6 0 00-12 0M9 10.5a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM19.5 19.5a5.25 5.25 0 00-3.9-5.07M16.5 3.13a3.75 3.75 0 010 7.24",
+    "target": "M21 12a9 9 0 11-18 0 9 9 0 0118 0zM15 12a3 3 0 11-6 0 3 3 0 016 0z",
+    "zap": "M13 3L4 14h7l-2 7 9-11h-7l2-7z",
+    "send": "M6 12L3.27 3.13a.5.5 0 01.67-.6l16.5 8.02a.5.5 0 010 .9L4.94 19.47a.5.5 0 01-.67-.6L6 12zm0 0h6",
+    "cog": "M10.34 3.94c.09-.54.56-.94 1.11-.94h1.1c.55 0 1.02.4 1.11.94l.17 1.03c.5.17.97.44 1.38.79l.98-.4a1.13 1.13 0 011.42.49l.55.95c.27.48.16 1.08-.26 1.42l-.82.64a5.6 5.6 0 010 1.58l.82.64c.42.34.53.94.26 1.42l-.55.95c-.28.48-.87.68-1.42.49l-.98-.4c-.41.35-.88.62-1.38.79l-.17 1.03c-.09.54-.56.94-1.11.94h-1.1c-.55 0-1.02-.4-1.11-.94l-.17-1.03a5.6 5.6 0 01-1.38-.79l-.98.4a1.13 1.13 0 01-1.42-.49l-.55-.95a1.13 1.13 0 01.26-1.42l.82-.64a5.6 5.6 0 010-1.58l-.82-.64a1.13 1.13 0 01-.26-1.42l.55-.95c.28-.48.87-.68 1.42-.49l.98.4c.41-.35.88-.62 1.38-.79l.17-1.03zM12 15a3 3 0 100-6 3 3 0 000 6z"
+  } -%}
+  <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none" viewBox="0 0 24 24"
+       stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" d="{{ icons.get(name, icons['grid']) }}"/></svg>
+{%- endmacro %}
+
+{#- KPI stat tile. tone: neutral|success|warning|error -#}
+{% macro kpi(label, value, tone="neutral", hint="") -%}
+  {%- set ring = {"success":"border-success/30","warning":"border-warning/40","error":"border-error/40","neutral":"border-base-300"} -%}
+  {%- set text = {"success":"text-success","warning":"text-warning","error":"text-error","neutral":"text-base-content"} -%}
+  <div class="rounded-xl border {{ ring.get(tone,'border-base-300') }} bg-base-100 p-4">
+    <div class="text-xs font-medium uppercase tracking-wide text-base-content/50">{{ label }}</div>
+    <div class="mt-1 text-3xl font-bold tabular-nums {{ text.get(tone,'') }}">{{ value }}</div>
+    {%- if hint %}<div class="mt-0.5 text-xs text-base-content/50">{{ hint }}</div>{% endif %}
+  </div>
 {%- endmacro %}

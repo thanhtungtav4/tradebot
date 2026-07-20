@@ -3,27 +3,34 @@
 {% from "admin/_tv_chart.html" import tv_chart, tv_interval %}
 {% block title %}Feeds{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-1">Feeds</h1>
-<p class="text-sm text-base-content/70 mb-4">TradingView không tự backfill lịch sử. Nếu alert bị tắt, bot sẽ thiếu candle cho khoảng thời gian đó.</p>
+<h1 class="text-2xl font-bold tracking-tight mb-1">Feeds</h1>
+<p class="text-sm text-base-content/60 mb-4">TradingView không tự backfill lịch sử. Nếu alert bị tắt, bot sẽ thiếu candle cho khoảng thời gian đó.</p>
 
-<div class="overflow-x-auto mb-4">
-<table class="table table-zebra table-sm">
-  <thead><tr><th>Symbol</th><th>Source symbol</th><th>TF</th><th>Status</th><th>Last candle</th><th>Age</th><th>Ngưỡng stale</th><th>Lỗi</th></tr></thead>
+<div class="rounded-xl border border-base-300 bg-base-100 overflow-hidden mb-6">
+<div class="overflow-x-auto">
+<table class="table table-sm">
+  <thead><tr class="text-xs uppercase text-base-content/40">
+    <th>Symbol</th><th class="hidden md:table-cell">Source</th><th>TF</th><th>Status</th>
+    <th class="hidden sm:table-cell">Last candle</th><th>Tuổi</th>
+    <th class="hidden lg:table-cell">Stale</th><th class="hidden xl:table-cell">Lỗi</th></tr></thead>
   <tbody>
   {% for f in feeds %}
-    <tr>
-      <td>{{ f.symbol }}</td><td><code class="text-xs">{{ f.source_symbol }}</code></td><td>{{ f.timeframe }}</td>
+    <tr class="hover:bg-base-200/50">
+      <td class="font-medium">{{ f.symbol }}</td>
+      <td class="hidden md:table-cell"><code class="text-xs text-base-content/60">{{ f.source_symbol }}</code></td>
+      <td class="text-base-content/60">{{ f.timeframe }}</td>
       <td>{{ status_badge(f.status) }}</td>
-      <td>{{ f.last_candle_time.strftime("%Y-%m-%d %H:%M") if f.last_candle_time else "—" }}</td>
-      <td>{{ f.age_minutes if f.age_minutes is not none else "—" }} phút</td>
-      <td>{{ f.stale_after_minutes }} phút</td>
-      <td>{{ f.last_error or "—" }}</td>
+      <td class="hidden sm:table-cell tabular-nums text-base-content/60">{{ f.last_candle_time.strftime("%m-%d %H:%M") if f.last_candle_time else "—" }}</td>
+      <td class="tabular-nums">{{ (f.age_minutes|round|int ~ "′") if f.age_minutes is not none else "—" }}</td>
+      <td class="hidden lg:table-cell tabular-nums text-base-content/50">{{ f.stale_after_minutes }}′</td>
+      <td class="hidden xl:table-cell text-error text-xs">{{ f.last_error or "—" }}</td>
     </tr>
   {% else %}
-    <tr><td colspan="8" class="text-base-content/60">Chưa nhận webhook nào.</td></tr>
+    <tr><td colspan="8" class="text-center text-base-content/50 py-10">Chưa nhận webhook nào.</td></tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
 </div>
 
 {% if feeds %}

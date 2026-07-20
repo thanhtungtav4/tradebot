@@ -1,23 +1,25 @@
 {% extends "admin/base.html" %}
 {% block title %}Strategies{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-1">Strategies</h1>
-<p class="text-sm text-base-content/70 mb-4">Cấu hình theo group chỉ ảnh hưởng routing/eligibility, KHÔNG ảnh hưởng logic detect global của strategy.</p>
+<h1 class="text-2xl font-bold tracking-tight mb-1">Strategies</h1>
+<p class="text-sm text-base-content/60 mb-5">Cấu hình theo group chỉ ảnh hưởng routing/eligibility, KHÔNG ảnh hưởng logic detect global của strategy.</p>
 
-<h2 class="text-lg font-semibold mb-2">Strategy registry</h2>
-<div class="overflow-x-auto mb-6">
-<table class="table table-zebra table-sm">
-  <thead><tr><th>Code</th><th>Tên</th><th>Version</th><th>Active</th></tr></thead>
+<h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-2">Strategy registry</h2>
+<div class="rounded-xl border border-base-300 bg-base-100 overflow-hidden mb-6">
+<table class="table table-sm">
+  <thead><tr class="text-xs uppercase text-base-content/40"><th>Code</th><th>Tên</th><th>Version</th><th>Active</th></tr></thead>
   <tbody>
   {% for s in strategies %}
-    <tr><td>{{ s.code }}</td><td>{{ s.name }}</td><td>{{ s.version }}</td>
-        <td>{{ "Có" if s.is_active else "Không" }}</td></tr>
+    <tr class="hover:bg-base-200/50"><td class="font-medium">{{ s.code }}</td><td>{{ s.name }}</td>
+        <td class="tabular-nums text-base-content/60">{{ s.version }}</td>
+        <td>{% if s.is_active %}<span class="badge badge-sm badge-success">Active</span>{% else %}<span class="badge badge-sm badge-ghost">Off</span>{% endif %}</td></tr>
   {% endfor %}
   </tbody>
 </table>
 </div>
 
-<h2 class="text-lg font-semibold mb-2">Group strategy settings</h2>
+<h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-2">Group strategy settings</h2>
+<div class="rounded-xl border border-base-300 bg-base-100 overflow-hidden">
 <div class="overflow-x-auto">
 <table class="table table-sm align-top">
   <thead><tr><th>Setting</th><th>Group</th><th>Routing config</th><th>Symbols</th><th>Timeframes</th><th>Active</th><th>Thao tác</th></tr></thead>
@@ -74,5 +76,6 @@
   {% endfor %}
   </tbody>
 </table>
+</div>
 </div>
 {% endblock %}

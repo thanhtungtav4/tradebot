@@ -2,34 +2,51 @@
 {% from "admin/_macros.html" import status_badge %}
 {% block title %}Signals{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-1">Signals</h1>
-<p class="text-sm text-base-content/70 mb-3">Tổng: {{ pagination.total }} · Trang {{ pagination.page }}/{{ pagination.pages }}</p>
+<div class="flex flex-wrap items-baseline justify-between gap-2 mb-4">
+  <h1 class="text-2xl font-bold tracking-tight">Signals</h1>
+  <span class="text-sm text-base-content/50 tabular-nums">
+    {{ pagination.total }} tín hiệu · trang {{ pagination.page }}/{{ pagination.pages }}</span>
+</div>
+
+<div class="rounded-xl border border-base-300 bg-base-100 overflow-hidden">
 <div class="overflow-x-auto">
-<table class="table table-zebra table-sm">
-  <thead><tr><th>Created</th><th>Symbol/TF</th><th>Strategy</th><th>Action</th><th>Entry</th><th>SL</th><th>RR</th><th>Conf</th><th>Status</th><th></th></tr></thead>
+<table class="table table-sm">
+  <thead><tr class="text-xs uppercase text-base-content/40">
+    <th>Thời gian</th><th>Symbol/TF</th><th class="hidden md:table-cell">Strategy</th><th>Action</th>
+    <th class="hidden sm:table-cell">Entry</th><th class="hidden lg:table-cell">SL</th>
+    <th class="hidden lg:table-cell">RR</th><th class="hidden sm:table-cell">Conf</th><th>Status</th><th></th>
+  </tr></thead>
   <tbody>
   {% for s in signals %}
-    <tr>
-      <td>{{ s.created_at.strftime("%m-%d %H:%M") }}</td>
-      <td>{{ s.symbol }} {{ s.timeframe }}</td>
-      <td>{{ s.strategy_code }}</td><td>{{ s.action }}</td>
-      <td>{{ s.entry or "—" }}</td><td>{{ s.sl or "—" }}</td>
-      <td>{{ s.risk_reward or "—" }}</td><td>{{ s.confidence if s.confidence is not none else "—" }}</td>
+    <tr class="hover:bg-base-200/50">
+      <td class="tabular-nums text-base-content/70">{{ s.created_at.strftime("%m-%d %H:%M") }}</td>
+      <td class="font-medium">{{ s.symbol }} {{ s.timeframe }}</td>
+      <td class="hidden md:table-cell text-base-content/60">{{ s.strategy_code }}</td>
+      <td><span class="badge badge-sm badge-outline">{{ s.action }}</span></td>
+      <td class="hidden sm:table-cell tabular-nums">{{ s.entry or "—" }}</td>
+      <td class="hidden lg:table-cell tabular-nums">{{ s.sl or "—" }}</td>
+      <td class="hidden lg:table-cell tabular-nums">{{ s.risk_reward or "—" }}</td>
+      <td class="hidden sm:table-cell tabular-nums">{{ s.confidence if s.confidence is not none else "—" }}</td>
       <td>{{ status_badge(s.status) }}</td>
-      <td><a href="/admin/signals/{{ s.id }}" class="link link-primary">Chi tiết</a></td>
+      <td><a href="/admin/signals/{{ s.id }}" class="btn btn-ghost btn-xs">Chi tiết</a></td>
     </tr>
   {% else %}
-    <tr><td colspan="10" class="text-base-content/60">Chưa có tín hiệu nào. Khi TradingView gửi đủ candle và strategy phát hiện setup, tín hiệu sẽ xuất hiện ở đây.</td></tr>
+    <tr><td colspan="10" class="text-center text-base-content/50 py-10">
+      Chưa có tín hiệu. Khi TradingView gửi đủ candle và strategy phát hiện setup, tín hiệu sẽ xuất hiện ở đây.</td></tr>
   {% endfor %}
   </tbody>
 </table>
 </div>
+</div>
+
+{% if pagination.has_prev or pagination.has_next %}
 <nav aria-label="Signals pagination" class="join mt-4">
   {% if pagination.has_prev %}
-  <a class="join-item btn btn-sm" href="/admin/signals?page={{ pagination.prev_page }}&per_page={{ pagination.per_page }}">Trang trước</a>
+  <a class="join-item btn btn-sm" href="/admin/signals?page={{ pagination.prev_page }}&per_page={{ pagination.per_page }}">← Trước</a>
   {% endif %}
   {% if pagination.has_next %}
-  <a class="join-item btn btn-sm" href="/admin/signals?page={{ pagination.next_page }}&per_page={{ pagination.per_page }}">Trang sau</a>
+  <a class="join-item btn btn-sm" href="/admin/signals?page={{ pagination.next_page }}&per_page={{ pagination.per_page }}">Sau →</a>
   {% endif %}
 </nav>
+{% endif %}
 {% endblock %}

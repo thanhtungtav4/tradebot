@@ -1,45 +1,44 @@
 {% extends "admin/base.html" %}
 {% block title %}Settings{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">Settings</h1>
+<h1 class="text-2xl font-bold tracking-tight mb-5">Settings</h1>
 
-<div class="card bg-base-100 shadow-sm mb-4">
-  <div class="card-body">
-    <h2 class="card-title text-base">TradingView webhook</h2>
-    <ul class="space-y-1 text-sm">
-      <li>URL: <code>/api/v1/webhooks/tradingview/bars/{token}</code></li>
-      <li>Webhook token (masked): <code>{{ webhook_masked }}</code></li>
-      <li>Auth: path token + body <code>secret</code>. HMAC chỉ dành cho MT4/MT5/custom webhook future.</li>
+<div class="grid gap-4 lg:grid-cols-2">
+  <section class="rounded-xl border border-base-300 bg-base-100 p-5">
+    <h2 class="font-semibold mb-3">TradingView webhook</h2>
+    <ul class="space-y-2 text-sm text-base-content/80">
+      <li>URL: <code class="text-xs bg-base-200 px-1.5 py-0.5 rounded">/api/v1/webhooks/tradingview/bars/{token}</code></li>
+      <li>Token (masked): <code class="text-xs bg-base-200 px-1.5 py-0.5 rounded">{{ webhook_masked }}</code></li>
+      <li>Auth: path token + body <code class="text-xs">secret</code>.</li>
     </ul>
-    <p class="text-sm text-base-content/60">Secret không hiển thị đầy đủ sau khi tạo. Rotation cần xác nhận.</p>
-  </div>
-</div>
+    <p class="text-xs text-base-content/50 mt-3">Secret không hiển thị đầy đủ sau khi tạo. Rotation cần xác nhận.</p>
+  </section>
 
-<div class="card bg-base-100 shadow-sm mb-4">
-  <div class="card-body">
-    <h2 class="card-title text-base">Active feeds / stale thresholds</h2>
-    <p class="text-sm">Stale grace: {{ stale_grace }} phút. M15 stale sau {{ stale_grace + 15 }}m, H1 sau {{ stale_grace + 60 }}m.</p>
-    <div class="overflow-x-auto">
-    <table class="table table-zebra table-sm">
-      <thead><tr><th>Symbol</th><th>Timeframe</th><th>Stale after</th></tr></thead>
+  <section class="rounded-xl border border-base-300 bg-base-100 p-5">
+    <h2 class="font-semibold mb-3">Admin security</h2>
+    <ul class="space-y-2 text-sm text-base-content/80">
+      <li class="flex gap-2"><span class="text-success">✓</span> Session cookie HttpOnly, SameSite=Lax, TTL 8h</li>
+      <li class="flex gap-2"><span class="text-success">✓</span> CSRF token bắt buộc cho mọi thay đổi</li>
+      <li class="flex gap-2"><span class="text-success">✓</span> Rate-limit login chống brute-force</li>
+      <li class="flex gap-2"><span class="text-success">✓</span> DB chỉ lưu hash, không plain secret</li>
+    </ul>
+  </section>
+
+  <section class="rounded-xl border border-base-300 bg-base-100 p-5 lg:col-span-2">
+    <h2 class="font-semibold mb-1">Feed stale thresholds</h2>
+    <p class="text-sm text-base-content/60 mb-3">Stale grace: {{ stale_grace }}′ · M15 stale sau {{ stale_grace + 15 }}′ · H1 sau {{ stale_grace + 60 }}′</p>
+    <div class="rounded-lg border border-base-200 overflow-hidden">
+    <table class="table table-sm">
+      <thead><tr class="text-xs uppercase text-base-content/40"><th>Symbol</th><th>Timeframe</th><th>Stale after</th></tr></thead>
       <tbody>
       {% for f in feeds %}
-        <tr><td>{{ f.canonical_symbol }}</td><td>{{ f.timeframe }}</td><td>{{ f.stale_after_minutes }} phút</td></tr>
+        <tr class="hover:bg-base-200/50"><td class="font-medium">{{ f.canonical_symbol }}</td>
+          <td class="text-base-content/60">{{ f.timeframe }}</td>
+          <td class="tabular-nums">{{ f.stale_after_minutes }}′</td></tr>
       {% endfor %}
       </tbody>
     </table>
     </div>
-  </div>
-</div>
-
-<div class="card bg-base-100 shadow-sm">
-  <div class="card-body">
-    <h2 class="card-title text-base">Admin security</h2>
-    <ul class="space-y-1 text-sm">
-      <li>Session auth: cookie HttpOnly, SameSite=Lax, TTL 8h.</li>
-      <li>CSRF token bắt buộc cho mọi thao tác thay đổi runtime.</li>
-      <li>Không lưu plain password/secret; DB chỉ lưu hash.</li>
-    </ul>
-  </div>
+  </section>
 </div>
 {% endblock %}

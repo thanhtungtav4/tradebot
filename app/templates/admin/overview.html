@@ -1,109 +1,127 @@
 {% extends "admin/base.html" %}
-{% from "admin/_macros.html" import status_badge %}
+{% from "admin/_macros.html" import status_badge, kpi %}
 {% block title %}Overview{% endblock %}
 {% block content %}
-<div class="flex items-baseline gap-3 mb-3">
-  <h1 class="text-2xl font-bold">Overview</h1>
-  <span class="text-sm text-base-content/60">Đăng nhập: {{ username }}</span>
+
+<div class="flex flex-wrap items-baseline justify-between gap-2 mb-5">
+  <h1 class="text-2xl font-bold tracking-tight">Tổng quan</h1>
+  <span class="text-sm text-base-content/50">Cập nhật realtime · {{ username }}</span>
 </div>
 
+{# ---- Health banner ---- #}
 {% if global_status != "OK" %}
-<div class="alert alert-error mb-3" role="alert">
-  <span>{{ data.next_action }}</span>
+<div class="alert alert-error mb-5 shadow-sm" role="alert">
+  <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none" viewBox="0 0 24 24"
+       stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round"
+       d="M12 9v3.75m0 3.75h.007M10.36 3.34l-8.4 14.55A1.5 1.5 0 003.26 20h17.48a1.5 1.5 0 001.3-2.11L13.64 3.34a1.5 1.5 0 00-2.6 0z"/></svg>
+  <span class="font-medium">{{ data.next_action }}</span>
 </div>
-{% if data.runbook %}
-<section class="mb-4" aria-labelledby="runbook-title">
-  <h2 id="runbook-title" class="text-lg font-semibold mb-2">Cách xử lý</h2>
-  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-    {% for item in data.runbook %}
-    <article class="card bg-base-100 border-l-4 border-warning shadow-sm">
-      <div class="card-body p-4">
-        <div class="flex items-center justify-between gap-2">
-          <h3 class="card-title text-base">{{ item.title }}</h3>
-          {{ status_badge(item.severity) }}
-        </div>
-        <p class="text-sm">{{ item.summary }}</p>
-        <ol class="list-decimal ml-5 text-sm space-y-1">
-          {% for step in item.steps %}<li>{{ step }}</li>{% endfor %}
-        </ol>
-        <a href="{{ item.link }}" class="link link-primary text-sm">{{ item.link_label }}</a>
-      </div>
-    </article>
-    {% endfor %}
-  </div>
-</section>
-{% endif %}
 {% else %}
-<div class="alert alert-success mb-4"><span>{{ data.next_action }}</span></div>
+<div class="alert alert-success mb-5 shadow-sm">
+  <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none" viewBox="0 0 24 24"
+       stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+  <span class="font-medium">{{ data.next_action }}</span>
+</div>
 {% endif %}
 
-<h2 class="text-lg font-semibold mb-2">Trạng thái thành phần</h2>
-<div class="flex flex-wrap gap-3 mb-6">
-  {% for c in data.components %}
-  <div class="card bg-base-100 shadow-sm min-w-44">
-    <div class="card-body p-4 gap-2">
-      <div class="flex items-center gap-2">
-        <span class="font-semibold">{{ c.component_code }}</span>
-        {{ status_badge(c.status) }}
+{# ---- KPI row: delivery queue at a glance ---- #}
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+  {{ kpi("Pending", data.delivery_summary.pending, "neutral", "đang chờ gửi") }}
+  {{ kpi("Retryable", data.delivery_summary.retryable,
+         "warning" if data.delivery_summary.retryable else "neutral", "sẽ thử lại") }}
+  {{ kpi("Thất bại", data.delivery_summary.permanent,
+         "error" if data.delivery_summary.permanent else "neutral", "cần xử lý") }}
+  {{ kpi("Đã gửi", data.delivery_summary.sent, "success", "tổng thành công") }}
+</div>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  {# ---- Left 2/3: components + feeds ---- #}
+  <div class="lg:col-span-2 space-y-6">
+
+    <section aria-labelledby="comp-title">
+      <h2 id="comp-title" class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-2">Thành phần</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {% for c in data.components %}
+        <div class="rounded-lg border border-base-300 bg-base-100 p-3">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-medium truncate">{{ c.component_code }}</span>
+            {{ status_badge(c.status) }}
+          </div>
+          <div class="mt-1 text-xs text-base-content/50 truncate">{{ c.summary or "—" }}</div>
+        </div>
+        {% endfor %}
       </div>
-      <div class="text-sm text-base-content/70">{{ c.summary or "—" }}</div>
-      <div class="text-xs text-base-content/50">Kiểm tra: {{ c.checked_at.strftime("%H:%M:%S") if c.checked_at else "—" }}</div>
-    </div>
+    </section>
+
+    <section aria-labelledby="feed-title">
+      <h2 id="feed-title" class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-2">Feed freshness</h2>
+      <div class="rounded-xl border border-base-300 bg-base-100 overflow-hidden">
+        <table class="table table-sm">
+          <thead><tr class="text-xs uppercase text-base-content/40">
+            <th>Symbol</th><th>TF</th><th>Status</th><th class="hidden sm:table-cell">Last candle</th><th>Tuổi</th>
+          </tr></thead>
+          <tbody>
+          {% for f in data.feeds %}
+            <tr class="hover:bg-base-200/50">
+              <td class="font-medium">{{ f.symbol }}</td>
+              <td class="text-base-content/60">{{ f.timeframe }}</td>
+              <td>{{ status_badge(f.status) }}</td>
+              <td class="hidden sm:table-cell text-base-content/60 tabular-nums">
+                {{ f.last_candle_time.strftime("%m-%d %H:%M") if f.last_candle_time else "—" }}</td>
+              <td class="tabular-nums">{{ (f.age_minutes|round|int ~ "′") if f.age_minutes is not none else "—" }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="text-center text-base-content/50 py-6">Chưa nhận webhook nào.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
   </div>
-  {% endfor %}
-</div>
 
-<h2 class="text-lg font-semibold mb-2">Feed freshness</h2>
-<div class="overflow-x-auto mb-6">
-<table class="table table-zebra table-sm">
-  <thead><tr><th>Symbol</th><th>Timeframe</th><th>Status</th><th>Last candle</th><th>Age (phút)</th><th>Lỗi</th></tr></thead>
-  <tbody>
-  {% for f in data.feeds %}
-    <tr>
-      <td>{{ f.symbol }}</td><td>{{ f.timeframe }}</td>
-      <td>{{ status_badge(f.status) }}</td>
-      <td>{{ f.last_candle_time.strftime("%Y-%m-%d %H:%M") if f.last_candle_time else "—" }}</td>
-      <td>{{ f.age_minutes if f.age_minutes is not none else "—" }}</td>
-      <td>{{ f.last_error or "—" }}</td>
-    </tr>
-  {% else %}
-    <tr><td colspan="6" class="text-base-content/60">Chưa có feed. Chưa nhận webhook nào.</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
-</div>
+  {# ---- Right 1/3: runbook when degraded ---- #}
+  <div class="space-y-6">
+    {% if global_status != "OK" and data.runbook %}
+    <section aria-labelledby="runbook-title">
+      <h2 id="runbook-title" class="text-sm font-semibold uppercase tracking-wide text-error mb-2">Cách xử lý</h2>
+      <div class="space-y-3">
+        {% for item in data.runbook %}
+        <article class="rounded-xl border-l-4 border-warning bg-base-100 border border-base-300 p-4">
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <h3 class="font-semibold text-sm">{{ item.title }}</h3>
+            {{ status_badge(item.severity) }}
+          </div>
+          <p class="text-sm text-base-content/70 mb-2">{{ item.summary }}</p>
+          <ol class="list-decimal ml-4 text-sm space-y-0.5 text-base-content/80">
+            {% for step in item.steps %}<li>{{ step }}</li>{% endfor %}
+          </ol>
+          <a href="{{ item.link }}" class="link link-primary text-sm mt-2 inline-block">{{ item.link_label }} →</a>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
 
-<h2 class="text-lg font-semibold mb-2">Delivery queue</h2>
-<div class="stats stats-horizontal shadow-sm bg-base-100 mb-2 flex-wrap">
-  <div class="stat py-3"><div class="stat-title">Pending</div><div class="stat-value text-2xl">{{ data.delivery_summary.pending }}</div></div>
-  <div class="stat py-3"><div class="stat-title">Retryable</div><div class="stat-value text-2xl">{{ data.delivery_summary.retryable }}</div></div>
-  <div class="stat py-3"><div class="stat-title">Permanent</div><div class="stat-value text-2xl">{{ data.delivery_summary.permanent }}</div></div>
-  <div class="stat py-3"><div class="stat-title">Sent</div><div class="stat-value text-2xl">{{ data.delivery_summary.sent }}</div></div>
-</div>
-<p class="text-sm text-base-content/70 mb-6">
-  Telegram cuối: {{ data.delivery_summary.last_sent_at.strftime("%Y-%m-%d %H:%M") if data.delivery_summary.last_sent_at else "—" }}
-  · <a href="/admin/deliveries" class="link link-primary">Xem delivery lỗi</a>
-</p>
-
-<h2 class="text-lg font-semibold mb-2">10 signal gần nhất</h2>
-<div class="overflow-x-auto">
-<table class="table table-zebra table-sm">
-  <thead><tr><th>Thời gian</th><th>Symbol/TF</th><th>Strategy</th><th>Action</th><th>Confidence</th><th>Status</th><th></th></tr></thead>
-  <tbody>
-  {% for s in data.signals %}
-    <tr>
-      <td>{{ s.created_at.strftime("%m-%d %H:%M") }}</td>
-      <td>{{ s.symbol }} {{ s.timeframe }}</td>
-      <td>{{ s.strategy_code }}</td>
-      <td>{{ s.action }}</td>
-      <td>{{ s.confidence if s.confidence is not none else "—" }}</td>
-      <td>{{ status_badge(s.status) }}</td>
-      <td><a href="/admin/signals/{{ s.id }}" class="link link-primary">Chi tiết</a></td>
-    </tr>
-  {% else %}
-    <tr><td colspan="7" class="text-base-content/60">Chưa có tín hiệu nào.</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
+    <section aria-labelledby="sig-title">
+      <div class="flex items-center justify-between mb-2">
+        <h2 id="sig-title" class="text-sm font-semibold uppercase tracking-wide text-base-content/50">Signal gần nhất</h2>
+        <a href="/admin/signals" class="link link-primary text-xs">Tất cả →</a>
+      </div>
+      <div class="rounded-xl border border-base-300 bg-base-100 divide-y divide-base-200">
+        {% for s in data.signals %}
+        <a href="/admin/signals/{{ s.id }}" class="flex items-center gap-3 p-3 hover:bg-base-200/50">
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-medium truncate">{{ s.symbol }} {{ s.timeframe }} · {{ s.action }}</div>
+            <div class="text-xs text-base-content/50 tabular-nums">{{ s.created_at.strftime("%m-%d %H:%M") }}
+              {%- if s.confidence is not none %} · {{ s.confidence }}%{% endif %}</div>
+          </div>
+          {{ status_badge(s.status) }}
+        </a>
+        {% else %}
+        <div class="text-center text-base-content/50 py-6 text-sm">Chưa có tín hiệu.</div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
 </div>
 {% endblock %}

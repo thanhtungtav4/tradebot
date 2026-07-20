@@ -31,9 +31,9 @@
   </div>
 </div>
 
-<h2 class="text-lg font-semibold mt-6 mb-2">Routing / delivery theo group</h2>
+<h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mt-6 mb-2">Routing / delivery theo group</h2>
 <div class="overflow-x-auto">
-<table class="table table-zebra table-sm">
+<table class="table table-sm rounded-xl border border-base-300 bg-base-100">
   <thead><tr><th>Outbox</th><th>Group</th><th>Status</th><th>Attempts</th><th>Next retry</th><th>Lỗi</th></tr></thead>
   <tbody>
   {% for o in d.outboxes %}
@@ -49,9 +49,9 @@
 </table>
 </div>
 
-<h2 class="text-lg font-semibold mt-6 mb-2">Attempt log</h2>
+<h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mt-6 mb-2">Attempt log</h2>
 <div class="overflow-x-auto">
-<table class="table table-zebra table-sm">
+<table class="table table-sm rounded-xl border border-base-300 bg-base-100">
   <thead><tr><th>Outbox</th><th>#</th><th>Status</th><th>HTTP</th><th>Msg id</th><th>Lỗi</th><th>Thời gian</th></tr></thead>
   <tbody>
   {% for a in d.deliveries %}
@@ -67,9 +67,9 @@
 </table>
 </div>
 
-<h2 class="text-lg font-semibold mt-6 mb-2">Event timeline</h2>
+<h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mt-6 mb-2">Event timeline</h2>
 <div class="overflow-x-auto">
-<table class="table table-zebra table-sm">
+<table class="table table-sm rounded-xl border border-base-300 bg-base-100">
   <thead><tr><th>Thời gian</th><th>Event</th><th>Message</th></tr></thead>
   <tbody>
   {% for e in d.events %}

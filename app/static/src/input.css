@@ -3,4 +3,6 @@
 /* Paths relative to this file: app/static/src/ */
 @source "../../templates/**/*.html";
 
-@plugin "../../../.bin/daisyui.mjs";
+@plugin "../../../.bin/daisyui.mjs" {
+  themes: corporate --default, business --prefersdark;
+}
