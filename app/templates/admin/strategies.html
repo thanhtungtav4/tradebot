@@ -19,63 +19,77 @@
 </div>
 
 <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-2">Group strategy settings</h2>
-<div class="rounded-xl border border-base-300 bg-base-100 overflow-hidden">
-<div class="overflow-x-auto">
-<table class="table table-sm align-top">
-  <thead><tr><th>Setting</th><th>Group</th><th>Routing config</th><th>Symbols</th><th>Timeframes</th><th>Active</th><th>Thao tác</th></tr></thead>
-  <tbody>
-  {% for row in settings %}
-    {% set gs = row.setting %}
-    <tr>
-      <td>{{ gs.setting_code }}</td>
-      <td>{{ row.group_name }} (#{{ gs.group_id }})</td>
-      <td>
-        <form method="post" action="/admin/strategies/settings/{{ gs.id }}" class="space-y-2">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <label class="form-control">
-            <span class="label-text text-xs">Min confidence</span>
-            <input name="min_confidence" type="number" min="0" max="100" value="{{ gs.min_confidence }}" required class="input input-bordered input-sm w-28">
-          </label>
-          <label class="form-control">
-            <span class="label-text text-xs">Send mode</span>
-            <select name="send_mode" required class="select select-bordered select-sm w-32">
-              {% for mode in send_modes %}
-              <option value="{{ mode }}"{% if gs.send_mode == mode %} selected{% endif %}>{{ mode }}</option>
-              {% endfor %}
-            </select>
-          </label>
-          <label class="form-control">
-            <span class="label-text text-xs">Cooldown phút</span>
-            <input name="cooldown_minutes" type="number" min="0" value="{{ gs.cooldown_minutes }}" required class="input input-bordered input-sm w-28">
-          </label>
-          <label class="form-control">
-            <span class="label-text text-xs">Min RR</span>
-            <input name="min_rr" type="number" min="0.1" step="0.1" value="{{ gs.min_rr }}" required class="input input-bordered input-sm w-28">
-          </label>
-      </td>
-      <td>
+<div class="space-y-4">
+{% for row in settings %}
+  {% set gs = row.setting %}
+  <form method="post" action="/admin/strategies/settings/{{ gs.id }}"
+        class="rounded-xl border border-base-300 bg-base-100 p-5">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-base-200">
+      <div>
+        <h3 class="font-semibold">{{ row.group_name }}</h3>
+        <p class="text-xs text-base-content/50">#{{ gs.group_id }} · {{ gs.setting_code }}</p>
+      </div>
+      <label class="label cursor-pointer gap-2">
+        <input name="is_active" type="checkbox"{% if gs.is_active %} checked{% endif %} class="toggle toggle-sm toggle-success">
+        <span class="label-text text-sm">Active</span>
+      </label>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <label class="form-control w-full">
+        <span class="label-text text-xs mb-1">Min confidence</span>
+        <input name="min_confidence" type="number" min="0" max="100" value="{{ gs.min_confidence }}" required class="input input-bordered input-sm w-full">
+      </label>
+      <label class="form-control w-full">
+        <span class="label-text text-xs mb-1">Send mode</span>
+        <select name="send_mode" required class="select select-bordered select-sm w-full">
+          {% for mode in send_modes %}
+          <option value="{{ mode }}"{% if gs.send_mode == mode %} selected{% endif %}>{{ mode }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="form-control w-full">
+        <span class="label-text text-xs mb-1">Cooldown (phút)</span>
+        <input name="cooldown_minutes" type="number" min="0" value="{{ gs.cooldown_minutes }}" required class="input input-bordered input-sm w-full">
+      </label>
+      <label class="form-control w-full">
+        <span class="label-text text-xs mb-1">Min RR</span>
+        <input name="min_rr" type="number" min="0.1" step="0.1" value="{{ gs.min_rr }}" required class="input input-bordered input-sm w-full">
+      </label>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2 mt-4">
+      <fieldset>
+        <legend class="text-xs font-medium text-base-content/50 mb-1.5">Symbols</legend>
+        <div class="flex flex-wrap gap-x-4 gap-y-1">
           {% for symbol in symbols %}
-          <label class="label cursor-pointer justify-start gap-2 py-0.5"><input name="symbols" type="checkbox" value="{{ symbol }}"{% if symbol in row.symbols %} checked{% endif %} class="checkbox checkbox-sm"> <span class="label-text">{{ symbol }}</span></label>
+          <label class="label cursor-pointer gap-2 py-0.5">
+            <input name="symbols" type="checkbox" value="{{ symbol }}"{% if symbol in row.symbols %} checked{% endif %} class="checkbox checkbox-sm">
+            <span class="label-text text-sm">{{ symbol }}</span></label>
           {% endfor %}
-      </td>
-      <td>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend class="text-xs font-medium text-base-content/50 mb-1.5">Timeframes</legend>
+        <div class="flex flex-wrap gap-x-4 gap-y-1">
           {% for tf in timeframes %}
-          <label class="label cursor-pointer justify-start gap-2 py-0.5"><input name="timeframes" type="checkbox" value="{{ tf }}"{% if tf in row.timeframes %} checked{% endif %} class="checkbox checkbox-sm"> <span class="label-text">{{ tf }}</span></label>
+          <label class="label cursor-pointer gap-2 py-0.5">
+            <input name="timeframes" type="checkbox" value="{{ tf }}"{% if tf in row.timeframes %} checked{% endif %} class="checkbox checkbox-sm">
+            <span class="label-text text-sm">{{ tf }}</span></label>
           {% endfor %}
-      </td>
-      <td>
-          <label class="label cursor-pointer justify-start gap-2"><input name="is_active" type="checkbox"{% if gs.is_active %} checked{% endif %} class="checkbox checkbox-sm"> <span class="label-text">Active</span></label>
-      </td>
-      <td>
-          <button type="submit" class="btn btn-sm btn-primary">Lưu setting</button>
-        </form>
-      </td>
-    </tr>
-  {% else %}
-    <tr><td colspan="7" class="text-base-content/60">Chưa có group strategy setting.</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
-</div>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="flex justify-end mt-4">
+      <button type="submit" class="btn btn-sm btn-primary">Lưu setting</button>
+    </div>
+  </form>
+{% else %}
+  <div class="rounded-xl border border-dashed border-base-300 bg-base-100 text-center text-base-content/50 py-12">
+    Chưa có group strategy setting.</div>
+{% endfor %}
 </div>
 {% endblock %}
