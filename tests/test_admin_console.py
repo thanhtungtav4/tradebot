@@ -233,7 +233,7 @@ def test_signal_detail_shows_timeline(logged_in_client, db):
     r = logged_in_client.get(f"/admin/signals/{sig.id}")
     assert r.status_code == 200
     assert "SIGNAL_APPROVED" in r.text
-    assert "Event timeline" in r.text
+    assert "Dòng thời gian sự kiện" in r.text
 
 
 def test_retry_delivery_writes_audit(logged_in_client, db, monkeypatch):

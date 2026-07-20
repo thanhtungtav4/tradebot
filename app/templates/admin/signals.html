@@ -1,9 +1,9 @@
 {% extends "admin/base.html" %}
 {% from "admin/_macros.html" import status_badge %}
-{% block title %}Signals{% endblock %}
+{% block title %}Tín hiệu{% endblock %}
 {% block content %}
 <div class="flex flex-wrap items-baseline justify-between gap-2 mb-4">
-  <h1 class="text-2xl font-bold tracking-tight">Signals</h1>
+  <h1 class="text-2xl font-bold tracking-tight">Tín hiệu</h1>
   <span class="text-sm text-base-content/50 tabular-nums">
     {{ pagination.total }} tín hiệu · trang {{ pagination.page }}/{{ pagination.pages }}</span>
 </div>
@@ -12,9 +12,9 @@
 <div class="overflow-x-auto">
 <table class="table table-sm">
   <thead><tr class="text-xs uppercase text-base-content/40">
-    <th>Thời gian</th><th>Symbol/TF</th><th class="hidden md:table-cell">Strategy</th><th>Action</th>
-    <th class="hidden sm:table-cell">Entry</th><th class="hidden lg:table-cell">SL</th>
-    <th class="hidden lg:table-cell">RR</th><th class="hidden sm:table-cell">Conf</th><th>Status</th><th></th>
+    <th>Thời gian</th><th>Cặp / Khung</th><th class="hidden md:table-cell">Chiến lược</th><th>Lệnh</th>
+    <th class="hidden sm:table-cell">Vào lệnh</th><th class="hidden lg:table-cell">Cắt lỗ</th>
+    <th class="hidden lg:table-cell">R:R</th><th class="hidden sm:table-cell">Độ tin</th><th>Trạng thái</th><th></th>
   </tr></thead>
   <tbody>
   {% for s in signals %}
@@ -40,7 +40,7 @@
 </div>
 
 {% if pagination.has_prev or pagination.has_next %}
-<nav aria-label="Signals pagination" class="join mt-4">
+<nav aria-label="Phân trang tín hiệu" class="join mt-4">
   {% if pagination.has_prev %}
   <a class="join-item btn btn-sm" href="/admin/signals?page={{ pagination.prev_page }}&per_page={{ pagination.per_page }}">← Trước</a>
   {% endif %}

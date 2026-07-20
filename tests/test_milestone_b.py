@@ -135,10 +135,10 @@ def test_login_then_overview(client):
     assert r.status_code == 303
     assert r.headers["location"] == "/admin"
 
-    # session cookie now grants Overview
+    # session cookie now grants the overview page
     ov = client.get("/admin")
     assert ov.status_code == 200
-    assert "Overview" in ov.text
+    assert "Tổng quan" in ov.text
 
 
 def test_login_wrong_password_401(client):

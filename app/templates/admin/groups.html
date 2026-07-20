@@ -1,9 +1,9 @@
 {% extends "admin/base.html" %}
 {% from "admin/_macros.html" import status_badge %}
-{% block title %}Groups{% endblock %}
+{% block title %}Nhóm Telegram{% endblock %}
 {% block content %}
 <div class="flex flex-wrap items-baseline justify-between gap-2 mb-4">
-  <h1 class="text-2xl font-bold tracking-tight">Groups</h1>
+  <h1 class="text-2xl font-bold tracking-tight">Nhóm Telegram</h1>
   <span class="text-sm text-base-content/50">{{ groups|length }} nhóm</span>
 </div>
 
@@ -17,8 +17,8 @@
         <div class="flex items-center gap-1.5 mt-1">
           <span class="badge badge-sm badge-outline">{{ g.type }}</span>
           <span class="badge badge-sm {{ 'badge-success' if g.mode == 'LIVE' else 'badge-ghost' }}">{{ g.mode }}</span>
-          {% if g.is_paused %}<span class="badge badge-sm badge-warning">Paused</span>{% endif %}
-          {% if not g.is_active %}<span class="badge badge-sm badge-ghost">Inactive</span>{% endif %}
+          {% if g.is_paused %}<span class="badge badge-sm badge-warning">Tạm dừng</span>{% endif %}
+          {% if not g.is_active %}<span class="badge badge-sm badge-ghost">Chưa bật</span>{% endif %}
         </div>
       </div>
       {% if g.last_delivery_status %}{{ status_badge(g.last_delivery_status) }}{% endif %}
@@ -35,18 +35,18 @@
     <div class="flex flex-wrap gap-1.5 mt-auto pt-1">
       <form method="post" action="/admin/groups/{{ g.id }}/test">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <button type="submit" class="btn btn-xs btn-primary">Test message</button>
+        <button type="submit" class="btn btn-xs btn-primary">Gửi thử</button>
       </form>
       {% if g.mode != "LIVE" or not g.is_active %}
       <form method="post" action="/admin/groups/{{ g.id }}/activate-live"
-            onsubmit="return confirm('Bật LIVE cho {{ g.name }}? Group sẽ nhận tín hiệu thật.')">
+            onsubmit="return confirm('Bật chế độ LIVE cho {{ g.name }}? Nhóm sẽ nhận tín hiệu thật.')">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <button type="submit" class="btn btn-xs btn-warning">Bật LIVE</button>
       </form>
       {% endif %}
       <form method="post" action="/admin/groups/{{ g.id }}/toggle">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <button type="submit" class="btn btn-xs btn-ghost">{{ "Resume" if g.is_paused else "Pause" }}</button>
+        <button type="submit" class="btn btn-xs btn-ghost">{{ "Tiếp tục" if g.is_paused else "Tạm dừng" }}</button>
       </form>
     </div>
   </article>

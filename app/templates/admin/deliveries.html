@@ -1,23 +1,23 @@
 {% extends "admin/base.html" %}
 {% from "admin/_macros.html" import status_badge %}
-{% block title %}Deliveries{% endblock %}
+{% block title %}Gửi tin{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold tracking-tight mb-4">Deliveries</h1>
+<h1 class="text-2xl font-bold tracking-tight mb-4">Gửi tin Telegram</h1>
 
-<div role="tablist" class="tabs tabs-box bg-base-100 border border-base-300 w-fit mb-4" aria-label="Delivery tabs">
-  {% for t, label in [("PENDING","Pending"),("FAILED_RETRYABLE","Retryable"),("FAILED_PERMANENT","Thất bại"),("SENT","Đã gửi")] %}
+<div role="tablist" class="tabs tabs-box bg-base-100 border border-base-300 w-fit mb-4" aria-label="Trạng thái gửi tin">
+  {% for t, label in [("PENDING","Chờ gửi"),("FAILED_RETRYABLE","Sẽ thử lại"),("FAILED_PERMANENT","Thất bại"),("SENT","Đã gửi")] %}
     <a role="tab" class="tab {% if tab == t %}tab-active font-semibold{% endif %}"
        href="/admin/deliveries?tab={{ t }}"{% if tab == t %} aria-current="page"{% endif %}>{{ label }}</a>
   {% endfor %}
 </div>
-<p class="text-sm text-base-content/50 mb-3 tabular-nums">{{ pagination.total }} bản ghi · trang {{ pagination.page }}/{{ pagination.pages }}</p>
+<p class="text-sm text-base-content/50 mb-3 tabular-nums">{{ pagination.total }} lượt gửi · trang {{ pagination.page }}/{{ pagination.pages }}</p>
 
 <div class="rounded-xl border border-base-300 bg-base-100 overflow-hidden">
 <div class="overflow-x-auto">
 <table class="table table-sm">
   <thead><tr class="text-xs uppercase text-base-content/40">
-    <th>Thời gian</th><th class="hidden sm:table-cell">Group</th><th>Signal</th><th>Status</th>
-    <th class="hidden md:table-cell">Attempts</th><th class="hidden lg:table-cell">Next retry</th>
+    <th>Thời gian</th><th class="hidden sm:table-cell">Nhóm</th><th>Tín hiệu</th><th>Trạng thái</th>
+    <th class="hidden md:table-cell">Số lần thử</th><th class="hidden lg:table-cell">Thử lại lúc</th>
     <th class="hidden xl:table-cell">Lỗi</th><th>Thao tác</th>
   </tr></thead>
   <tbody>
@@ -36,14 +36,14 @@
         {% if o.status in ("FAILED_RETRYABLE", "PENDING") %}
         <form method="post" action="/admin/deliveries/{{ o.id }}/retry">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button type="submit" class="btn btn-xs btn-primary">Retry</button>
+          <button type="submit" class="btn btn-xs btn-primary">Gửi lại</button>
         </form>
         {% endif %}
         {% if o.status != "SENT" %}
         <form method="post" action="/admin/deliveries/{{ o.id }}/skip">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <input type="hidden" name="reason" value="Skipped by admin">
-          <button type="submit" class="btn btn-xs btn-ghost">Skip</button>
+          <button type="submit" class="btn btn-xs btn-ghost">Bỏ qua</button>
         </form>
         {% endif %}
         </div>
@@ -58,7 +58,7 @@
 </div>
 
 {% if pagination.has_prev or pagination.has_next %}
-<nav aria-label="Deliveries pagination" class="join mt-4">
+<nav aria-label="Phân trang gửi tin" class="join mt-4">
   {% if pagination.has_prev %}
   <a class="join-item btn btn-sm" href="/admin/deliveries?tab={{ tab }}&page={{ pagination.prev_page }}&per_page={{ pagination.per_page }}">← Trước</a>
   {% endif %}

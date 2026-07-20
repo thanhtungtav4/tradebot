@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% from "admin/_macros.html" import status_badge, kpi %}
-{% block title %}Overview{% endblock %}
+{% block title %}Tổng quan{% endblock %}
 {% block content %}
 
 <div class="flex flex-wrap items-baseline justify-between gap-2 mb-5">
@@ -26,11 +26,11 @@
 
 {# ---- KPI row: delivery queue at a glance ---- #}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-  {{ kpi("Pending", data.delivery_summary.pending, "neutral", "đang chờ gửi") }}
-  {{ kpi("Retryable", data.delivery_summary.retryable,
-         "warning" if data.delivery_summary.retryable else "neutral", "sẽ thử lại") }}
-  {{ kpi("Thất bại", data.delivery_summary.permanent,
-         "error" if data.delivery_summary.permanent else "neutral", "cần xử lý") }}
+  {{ kpi("Chờ gửi", data.delivery_summary.pending, "neutral", "đang xếp hàng") }}
+  {{ kpi("Sẽ thử lại", data.delivery_summary.retryable,
+         "warning" if data.delivery_summary.retryable else "neutral", "gửi lỗi, tự gửi lại") }}
+  {{ kpi("Gửi thất bại", data.delivery_summary.permanent,
+         "error" if data.delivery_summary.permanent else "neutral", "cần xử lý tay") }}
   {{ kpi("Đã gửi", data.delivery_summary.sent, "success", "tổng thành công") }}
 </div>
 
@@ -39,7 +39,7 @@
   <div class="lg:col-span-2 space-y-6">
 
     <section aria-labelledby="comp-title">
-      <h2 id="comp-title" class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-2">Thành phần</h2>
+      <h2 id="comp-title" class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-2">Tình trạng hệ thống</h2>
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {% for c in data.components %}
         <div class="rounded-lg border border-base-300 bg-base-100 p-3">
@@ -54,11 +54,11 @@
     </section>
 
     <section aria-labelledby="feed-title">
-      <h2 id="feed-title" class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-2">Feed freshness</h2>
+      <h2 id="feed-title" class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-2">Độ mới dữ liệu nến</h2>
       <div class="rounded-xl border border-base-300 bg-base-100 overflow-hidden">
         <table class="table table-sm">
           <thead><tr class="text-xs uppercase text-base-content/40">
-            <th>Symbol</th><th>TF</th><th>Status</th><th class="hidden sm:table-cell">Last candle</th><th>Tuổi</th>
+            <th>Cặp</th><th>Khung</th><th>Trạng thái</th><th class="hidden sm:table-cell">Nến cuối</th><th>Cách đây</th>
           </tr></thead>
           <tbody>
           {% for f in data.feeds %}
@@ -104,8 +104,8 @@
 
     <section aria-labelledby="sig-title">
       <div class="flex items-center justify-between mb-2">
-        <h2 id="sig-title" class="text-sm font-semibold uppercase tracking-wide text-base-content/50">Signal gần nhất</h2>
-        <a href="/admin/signals" class="link link-primary text-xs">Tất cả →</a>
+        <h2 id="sig-title" class="text-sm font-semibold uppercase tracking-wide text-base-content/50">Tín hiệu gần nhất</h2>
+        <a href="/admin/signals" class="link link-primary text-xs">Xem tất cả →</a>
       </div>
       <div class="rounded-xl border border-base-300 bg-base-100 divide-y divide-base-200">
         {% for s in data.signals %}

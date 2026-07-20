@@ -1,18 +1,18 @@
 {% extends "admin/base.html" %}
 {% from "admin/_macros.html" import status_badge %}
 {% from "admin/_tv_chart.html" import tv_chart, tv_interval %}
-{% block title %}Feeds{% endblock %}
+{% block title %}Dữ liệu nến{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold tracking-tight mb-1">Feeds</h1>
+<h1 class="text-2xl font-bold tracking-tight mb-1">Dữ liệu nến</h1>
 <p class="text-sm text-base-content/60 mb-4">TradingView không tự backfill lịch sử. Nếu alert bị tắt, bot sẽ thiếu candle cho khoảng thời gian đó.</p>
 
 <div class="rounded-xl border border-base-300 bg-base-100 overflow-hidden mb-6">
 <div class="overflow-x-auto">
 <table class="table table-sm">
   <thead><tr class="text-xs uppercase text-base-content/40">
-    <th>Symbol</th><th class="hidden md:table-cell">Source</th><th>TF</th><th>Status</th>
-    <th class="hidden sm:table-cell">Last candle</th><th>Tuổi</th>
-    <th class="hidden lg:table-cell">Stale</th><th class="hidden xl:table-cell">Lỗi</th></tr></thead>
+    <th>Cặp</th><th class="hidden md:table-cell">Mã nguồn</th><th>Khung</th><th>Trạng thái</th>
+    <th class="hidden sm:table-cell">Nến cuối</th><th>Cách đây</th>
+    <th class="hidden lg:table-cell">Ngưỡng cũ</th><th class="hidden xl:table-cell">Lỗi</th></tr></thead>
   <tbody>
   {% for f in feeds %}
     <tr class="hover:bg-base-200/50">
@@ -34,7 +34,7 @@
 </div>
 
 {% if feeds %}
-<h2 class="text-lg font-semibold mb-2">Biểu đồ TradingView theo feed</h2>
+<h2 class="text-lg font-semibold mb-2">Biểu đồ TradingView theo từng cặp</h2>
 <div class="space-y-2 mb-6">
   {% for f in feeds %}
   <details class="collapse collapse-arrow bg-base-100 border border-base-300 rounded-box">
@@ -47,7 +47,7 @@
 </div>
 {% endif %}
 
-<h2 class="text-lg font-semibold mb-2">Webhook setup</h2>
+<h2 class="text-lg font-semibold mb-2">Cách cấu hình webhook</h2>
 <p class="text-sm text-base-content/70 mb-2">URL: <code>{{ webhook_url }}</code> (thay <code>{token}</code> bằng TradingView webhook token). Body phải chứa field <code>secret</code>.</p>
 <pre class="bg-base-300 rounded-box p-4 text-xs overflow-x-auto">{
   "secret": "&lt;body_secret&gt;",

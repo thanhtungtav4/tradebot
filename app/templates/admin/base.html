@@ -50,17 +50,17 @@
         <nav aria-label="Điều hướng chính" class="flex-1 p-3">
           <ul class="menu gap-0.5 w-full">
           {% set sections = [
-            ("/admin","Overview","grid"),
-            ("/admin/feeds","Feeds","activity"),
-            ("/admin/groups","Groups","users"),
-            ("/admin/strategies","Strategies","target"),
-            ("/admin/signals","Signals","zap"),
-            ("/admin/deliveries","Deliveries","send"),
-            ("/admin/settings","Settings","cog")] %}
-          {% for href, label, icon in sections %}
+            ("/admin","Tổng quan","grid","Overview"),
+            ("/admin/feeds","Dữ liệu nến","activity","Feeds"),
+            ("/admin/groups","Nhóm Telegram","users","Groups"),
+            ("/admin/strategies","Chiến lược","target","Strategies"),
+            ("/admin/signals","Tín hiệu","zap","Signals"),
+            ("/admin/deliveries","Gửi tin","send","Deliveries"),
+            ("/admin/settings","Cấu hình","cog","Settings")] %}
+          {% for href, label, icon, key in sections %}
             <li>
-              <a href="{{ href }}" class="{% if section == label %}menu-active font-semibold{% endif %}"
-                 {% if section == label %}aria-current="page"{% endif %}>
+              <a href="{{ href }}" class="{% if section == key %}menu-active font-semibold{% endif %}"
+                 {% if section == key %}aria-current="page"{% endif %}>
                 {{ nav_icon(icon) }}{{ label }}
               </a>
             </li>
