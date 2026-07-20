@@ -2,23 +2,24 @@
 {% block title %}Chiến lược{% endblock %}
 {% block content %}
 <h1 class="text-2xl font-bold tracking-tight mb-1">Chiến lược</h1>
-<p class="text-sm text-base-content/60 mb-5">Cấu hình theo group chỉ ảnh hưởng routing/eligibility, KHÔNG ảnh hưởng logic detect global của strategy.</p>
+<p class="text-sm text-base-content/60 mb-5">Bot dùng chiến lược để tự tìm điểm vào lệnh. Ở đây bạn cài đặt <b>mỗi nhóm Telegram nhận loại tín hiệu nào</b> — không thay đổi cách bot phân tích.</p>
 
-<h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-2">Strategy registry</h2>
-<div class="rounded-xl border border-base-300 bg-base-100 overflow-hidden mb-6">
+<h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-2">Chiến lược đang chạy</h2>
+<div class="rounded-xl border border-base-300 bg-base-100 overflow-hidden mb-8">
 <table class="table table-sm">
-  <thead><tr class="text-xs uppercase text-base-content/40"><th>Code</th><th>Tên</th><th>Version</th><th>Active</th></tr></thead>
+  <thead><tr class="text-xs uppercase text-base-content/40"><th>Mã</th><th>Tên</th><th>Phiên bản</th><th>Trạng thái</th></tr></thead>
   <tbody>
   {% for s in strategies %}
     <tr class="hover:bg-base-200/50"><td class="font-medium">{{ s.code }}</td><td>{{ s.name }}</td>
         <td class="tabular-nums text-base-content/60">{{ s.version }}</td>
-        <td>{% if s.is_active %}<span class="badge badge-sm badge-success">Active</span>{% else %}<span class="badge badge-sm badge-ghost">Off</span>{% endif %}</td></tr>
+        <td>{% if s.is_active %}<span class="badge badge-sm badge-success">Đang bật</span>{% else %}<span class="badge badge-sm badge-ghost">Tắt</span>{% endif %}</td></tr>
   {% endfor %}
   </tbody>
 </table>
 </div>
 
-<h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-2">Group strategy settings</h2>
+<h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-1">Cài đặt cho từng nhóm</h2>
+<p class="text-xs text-base-content/50 mb-3">Mỗi thẻ dưới đây là một nhóm Telegram. Chỉnh xong nhớ bấm <b>Lưu</b>.</p>
 <div class="space-y-4">
 {% for row in settings %}
   {% set gs = row.setting %}
@@ -29,40 +30,45 @@
     <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-base-200">
       <div>
         <h3 class="font-semibold">{{ row.group_name }}</h3>
-        <p class="text-xs text-base-content/50">#{{ gs.group_id }} · {{ gs.setting_code }}</p>
+        <p class="text-xs text-base-content/50">Nhóm #{{ gs.group_id }}</p>
       </div>
       <label class="label cursor-pointer gap-2">
         <input name="is_active" type="checkbox"{% if gs.is_active %} checked{% endif %} class="toggle toggle-sm toggle-success">
-        <span class="label-text text-sm">Active</span>
+        <span class="label-text text-sm">Bật gửi cho nhóm này</span>
       </label>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <label class="form-control w-full">
-        <span class="label-text text-xs mb-1">Min confidence</span>
+        <span class="label-text text-xs font-medium">Độ tin tối thiểu</span>
+        <span class="text-[11px] text-base-content/40 mb-1">Chỉ gửi tín hiệu mạnh từ mức này trở lên (0–100)</span>
         <input name="min_confidence" type="number" min="0" max="100" value="{{ gs.min_confidence }}" required class="input input-bordered input-sm w-full">
       </label>
       <label class="form-control w-full">
-        <span class="label-text text-xs mb-1">Send mode</span>
+        <span class="label-text text-xs font-medium">Kiểu tin nhắn</span>
+        <span class="text-[11px] text-base-content/40 mb-1">Đầy đủ (có entry/SL/TP) hay cơ bản</span>
+        {% set mode_labels = {"BASIC": "Cơ bản", "FULL": "Đầy đủ", "SUMMARY": "Tóm tắt"} %}
         <select name="send_mode" required class="select select-bordered select-sm w-full">
           {% for mode in send_modes %}
-          <option value="{{ mode }}"{% if gs.send_mode == mode %} selected{% endif %}>{{ mode }}</option>
+          <option value="{{ mode }}"{% if gs.send_mode == mode %} selected{% endif %}>{{ mode_labels.get(mode, mode) }}</option>
           {% endfor %}
         </select>
       </label>
       <label class="form-control w-full">
-        <span class="label-text text-xs mb-1">Cooldown (phút)</span>
+        <span class="label-text text-xs font-medium">Thời gian chờ (phút)</span>
+        <span class="text-[11px] text-base-content/40 mb-1">Tránh gửi trùng tín hiệu liên tục</span>
         <input name="cooldown_minutes" type="number" min="0" value="{{ gs.cooldown_minutes }}" required class="input input-bordered input-sm w-full">
       </label>
       <label class="form-control w-full">
-        <span class="label-text text-xs mb-1">Min RR</span>
+        <span class="label-text text-xs font-medium">Tỷ lệ Lời/Lỗ tối thiểu</span>
+        <span class="text-[11px] text-base-content/40 mb-1">Ví dụ 1.5 = lời gấp 1.5 lần rủi ro</span>
         <input name="min_rr" type="number" min="0.1" step="0.1" value="{{ gs.min_rr }}" required class="input input-bordered input-sm w-full">
       </label>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2 mt-4">
       <fieldset>
-        <legend class="text-xs font-medium text-base-content/50 mb-1.5">Symbols</legend>
+        <legend class="text-xs font-medium text-base-content/60 mb-1.5">Cặp tiền gửi cho nhóm này</legend>
         <div class="flex flex-wrap gap-x-4 gap-y-1">
           {% for symbol in symbols %}
           <label class="label cursor-pointer gap-2 py-0.5">
@@ -72,7 +78,7 @@
         </div>
       </fieldset>
       <fieldset>
-        <legend class="text-xs font-medium text-base-content/50 mb-1.5">Timeframes</legend>
+        <legend class="text-xs font-medium text-base-content/60 mb-1.5">Khung thời gian gửi</legend>
         <div class="flex flex-wrap gap-x-4 gap-y-1">
           {% for tf in timeframes %}
           <label class="label cursor-pointer gap-2 py-0.5">
@@ -84,12 +90,12 @@
     </div>
 
     <div class="flex justify-end mt-4">
-      <button type="submit" class="btn btn-sm btn-primary">Lưu setting</button>
+      <button type="submit" class="btn btn-sm btn-primary">Lưu cài đặt</button>
     </div>
   </form>
 {% else %}
   <div class="rounded-xl border border-dashed border-base-300 bg-base-100 text-center text-base-content/50 py-12">
-    Chưa có group strategy setting.</div>
+    Chưa có nhóm nào được cài đặt. Tạo nhóm ở trang <a href="/admin/groups" class="link link-primary">Nhóm Telegram</a> trước.</div>
 {% endfor %}
 </div>
 {% endblock %}
