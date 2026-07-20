@@ -1,0 +1,117 @@
+{% extends "admin/base.html" %}
+{% block title %}Hướng dẫn cài đặt{% endblock %}
+{% block content %}
+
+<div class="max-w-3xl mx-auto">
+  <h1 class="text-2xl font-bold tracking-tight mb-1">Hướng dẫn kết nối TradingView</h1>
+  <p class="text-base-content/60 mb-6">Làm theo từng bước. Chỗ nào có nút <b>Chép</b> thì bấm để sao chép, rồi dán vào TradingView.</p>
+
+  {# Intro card #}
+  <div class="rounded-xl border border-info/30 bg-info/5 p-4 mb-6 flex gap-3">
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-6 shrink-0 text-info" fill="none" viewBox="0 0 24 24"
+         stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round"
+         d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zM12 9h.008v.008H12V9z"/></svg>
+    <div class="text-sm">
+      <p class="font-medium mb-1">Bạn cần gì trước khi bắt đầu</p>
+      <p class="text-base-content/70">Một tài khoản TradingView có gói trả phí (Essential trở lên) — vì chỉ gói trả phí mới gửi được webhook. Nếu chưa có, nâng cấp tại tradingview.com.</p>
+    </div>
+  </div>
+
+  {# ---- STEP 1 ---- #}
+  <section class="mb-8">
+    <div class="flex items-center gap-3 mb-3">
+      <span class="size-8 rounded-full bg-primary text-primary-content grid place-items-center font-bold">1</span>
+      <h2 class="text-lg font-semibold">Mở biểu đồ trên TradingView</h2>
+    </div>
+    <div class="pl-11 space-y-2 text-sm text-base-content/80">
+      <p>1. Vào <b>tradingview.com</b> và đăng nhập.</p>
+      <p>2. Ở ô tìm kiếm phía trên, gõ tên cặp — ví dụ <code class="bg-base-200 px-1.5 py-0.5 rounded">OANDA:XAUUSD</code> (vàng).</p>
+      <p>3. Chọn khung thời gian ở góc trên bên trái: <b>15</b> (tức M15) hoặc <b>1h</b> (tức H1).</p>
+    </div>
+  </section>
+
+  {# ---- STEP 2 ---- #}
+  <section class="mb-8">
+    <div class="flex items-center gap-3 mb-3">
+      <span class="size-8 rounded-full bg-primary text-primary-content grid place-items-center font-bold">2</span>
+      <h2 class="text-lg font-semibold">Tạo Alert (cảnh báo)</h2>
+    </div>
+    <div class="pl-11 space-y-2 text-sm text-base-content/80">
+      <p>1. Bấm nút hình cái đồng hồ ⏰ trên thanh công cụ (hoặc nhấn phím <kbd class="kbd kbd-sm">Alt</kbd> + <kbd class="kbd kbd-sm">A</kbd>).</p>
+      <p>2. Ở mục <b>Condition</b> (điều kiện), chọn đúng cặp đang xem, rồi chọn <b class="text-primary">Once Per Bar Close</b> (mỗi khi nến đóng). Bước này rất quan trọng.</p>
+      <p>3. Chuyển sang mục <b>Notifications</b> (thông báo), tích vào ô <b>Webhook URL</b>.</p>
+    </div>
+  </section>
+
+  {# ---- STEP 3: paste URL ---- #}
+  <section class="mb-8">
+    <div class="flex items-center gap-3 mb-3">
+      <span class="size-8 rounded-full bg-primary text-primary-content grid place-items-center font-bold">3</span>
+      <h2 class="text-lg font-semibold">Dán địa chỉ Webhook URL</h2>
+    </div>
+    <div class="pl-11 space-y-3 text-sm text-base-content/80">
+      <p>Bấm <b>Chép</b>, rồi dán vào ô <b>Webhook URL</b> trong TradingView. Dùng chung địa chỉ này cho tất cả các cặp.</p>
+      <div class="join w-full">
+        <input id="wh-url" type="text" readonly value="{{ webhook_url }}"
+               class="input input-bordered input-sm join-item flex-1 font-mono text-xs">
+        <button type="button" class="btn btn-sm btn-primary join-item"
+                onclick="navigator.clipboard.writeText(document.getElementById('wh-url').value); this.textContent='Đã chép ✓'; setTimeout(()=>this.textContent='Chép',1500);">Chép</button>
+      </div>
+    </div>
+  </section>
+
+  {# ---- STEP 4: paste JSON per alert ---- #}
+  <section class="mb-8">
+    <div class="flex items-center gap-3 mb-3">
+      <span class="size-8 rounded-full bg-primary text-primary-content grid place-items-center font-bold">4</span>
+      <h2 class="text-lg font-semibold">Dán nội dung Message</h2>
+    </div>
+    <div class="pl-11 space-y-3 text-sm text-base-content/80">
+      <p>Trong TradingView có ô <b>Message</b>. Với <b>mỗi cặp + khung</b>, chép đúng đoạn tương ứng bên dưới và dán vào ô Message.</p>
+      <p class="text-base-content/60">Bạn cần tạo tất cả <b>{{ alerts|length }} cảnh báo</b> (mỗi thẻ dưới đây là một cảnh báo).</p>
+
+      <div class="grid gap-3 sm:grid-cols-2 mt-2">
+      {% for a in alerts %}
+        <div class="rounded-xl border border-base-300 bg-base-100 p-4">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div>
+              <div class="font-semibold">{{ a.symbol }} · {{ a.timeframe }}</div>
+              <div class="text-xs text-base-content/50 font-mono">{{ a.source_symbol }}</div>
+            </div>
+            <button type="button" class="btn btn-xs btn-primary"
+                    onclick="navigator.clipboard.writeText(this.nextElementSibling.textContent); this.textContent='Đã chép ✓'; setTimeout(()=>this.textContent='Chép đoạn này',1500);">Chép đoạn này</button>
+            <pre class="hidden">{{ a.json }}</pre>
+          </div>
+          <pre class="bg-base-200 rounded-lg p-3 text-[11px] leading-relaxed overflow-x-auto">{{ a.json }}</pre>
+        </div>
+      {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {# ---- STEP 5 ---- #}
+  <section class="mb-8">
+    <div class="flex items-center gap-3 mb-3">
+      <span class="size-8 rounded-full bg-primary text-primary-content grid place-items-center font-bold">5</span>
+      <h2 class="text-lg font-semibold">Lưu Alert</h2>
+    </div>
+    <div class="pl-11 space-y-2 text-sm text-base-content/80">
+      <p>1. Ở mục <b>Expiration</b> (thời hạn), chọn <b>Open-ended</b> (không hết hạn).</p>
+      <p>2. Bấm <b>Create</b> (tạo).</p>
+      <p>3. Lặp lại từ Bước 1 cho đến khi tạo đủ {{ alerts|length }} cảnh báo.</p>
+    </div>
+  </section>
+
+  {# ---- Done ---- #}
+  <div class="rounded-xl border border-success/30 bg-success/5 p-4 flex gap-3">
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-6 shrink-0 text-success" fill="none" viewBox="0 0 24 24"
+         stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+    <div class="text-sm">
+      <p class="font-medium mb-1">Xong! Kiểm tra kết quả</p>
+      <p class="text-base-content/70">Sau khi nến tiếp theo đóng (tối đa 15 phút với M15), vào trang
+        <a href="/admin/feeds" class="link link-primary">Dữ liệu nến</a> — nếu thấy trạng thái chuyển sang
+        <b class="text-success">OK</b> là đã kết nối thành công.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

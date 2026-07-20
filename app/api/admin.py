@@ -150,6 +150,35 @@ def overview(request: Request, session: dict = Depends(require_session), db: Ses
                    {"data": admin_svc.overview(db)})
 
 
+@router.get("/guide", response_class=HTMLResponse)
+def guide(request: Request, session: dict = Depends(require_session), db: Session = Depends(get_db)):
+    """Step-by-step TradingView setup wizard with per-feed copy-paste JSON."""
+    settings = get_settings()
+    token = settings.tradingview_webhook_token
+    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
+    host = request.headers.get("host", request.url.netloc)
+    webhook_url = f"{scheme}://{host}/api/v1/webhooks/tradingview/bars/{token}"
+
+    feeds_list = db.scalars(
+        select(DataSourceFeed).where(DataSourceFeed.is_active.is_(True))
+        .order_by(DataSourceFeed.canonical_symbol, DataSourceFeed.timeframe)
+    ).all()
+    alerts = [
+        {
+            "symbol": f.canonical_symbol,
+            "timeframe": f.timeframe,
+            "source_symbol": f.source_symbol,
+            "json": admin_svc.tradingview_alert_json(settings.tradingview_body_secret, f.source_symbol, f.timeframe),
+        }
+        for f in feeds_list
+    ]
+    return _render(request, db, session, "admin/guide.html", "Guide", {
+        "webhook_url": webhook_url,
+        "body_secret": settings.tradingview_body_secret,
+        "alerts": alerts,
+    })
+
+
 @router.get("/feeds", response_class=HTMLResponse)
 def feeds(request: Request, session: dict = Depends(require_session), db: Session = Depends(get_db)):
     settings = get_settings()

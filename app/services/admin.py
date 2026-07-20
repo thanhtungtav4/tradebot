@@ -29,6 +29,27 @@ def is_placeholder_chat_id(chat_id: str) -> bool:
     return chat_id.upper().startswith(_PLACEHOLDER_CHAT_PREFIXES)
 
 
+def tradingview_alert_json(body_secret: str, source_symbol: str, timeframe: str) -> str:
+    """Ready-to-paste TradingView alert message for one symbol/timeframe.
+
+    Uses TradingView placeholders {{open}}... which the platform fills at send time.
+    """
+    return (
+        "{\n"
+        f'  "secret": "{body_secret}",\n'
+        f'  "symbol": "{source_symbol}",\n'
+        f'  "timeframe": "{timeframe}",\n'
+        '  "time": "{{time}}",\n'
+        '  "open": "{{open}}",\n'
+        '  "high": "{{high}}",\n'
+        '  "low": "{{low}}",\n'
+        '  "close": "{{close}}",\n'
+        '  "volume": "{{volume}}",\n'
+        '  "isClosed": true\n'
+        "}"
+    )
+
+
 def live_activation_error(group) -> str | None:
     """Return the reason a group cannot be activated as LIVE, or None when safe."""
     if is_placeholder_chat_id(group.telegram_chat_id):
