@@ -212,6 +212,13 @@ def feeds(request: Request, session: dict = Depends(require_session), db: Sessio
                     "is_local": settings.app_env in ("local", "staging")})
 
 
+@router.get("/strategies-guide", response_class=HTMLResponse)
+def strategies_guide(request: Request, session: dict = Depends(require_session), db: Session = Depends(get_db)):
+    from app.services.strategy_catalog import strategy_catalog
+    return _render(request, db, session, "admin/strategies_guide.html", "StrategiesGuide",
+                   {"catalog": strategy_catalog(db)})
+
+
 @router.get("/strategies", response_class=HTMLResponse)
 def strategies(request: Request, session: dict = Depends(require_session), db: Session = Depends(get_db)):
     strats = db.scalars(select(Strategy).order_by(Strategy.code)).all()

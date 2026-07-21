@@ -34,3 +34,10 @@ def test_strategy_catalog_shape(db):
     a = ls["alerts"][0]
     assert set(a) == {"symbol", "timeframe", "json"}
     assert '"secret"' in a["json"]
+
+
+def test_strategies_guide_page_renders(logged_in_client):
+    r = logged_in_client.get("/admin/strategies-guide")
+    assert r.status_code == 200
+    assert "Chọn cách đánh" in r.text
+    assert "Liquidity Sweep" in r.text
