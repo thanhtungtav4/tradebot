@@ -10,3 +10,8 @@ _REGISTRY: dict[str, BaseStrategy] = {
 
 def get_strategy(code: str) -> BaseStrategy | None:
     return _REGISTRY.get(code)
+
+
+def all_strategies() -> list[BaseStrategy]:
+    """Every registered strategy instance (order stable by insertion)."""
+    return list(_REGISTRY.values())
