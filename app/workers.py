@@ -97,3 +97,26 @@ def scan_component_health(_payload: dict | None = None) -> None:
 
     with SessionLocal() as db:
         collect_health(db, persist=True)
+
+
+def demo_tick(_payload: dict | None = None) -> None:
+    """Maintenance job: emit a demo signal when demo mode is on and interval elapsed."""
+    from datetime import datetime, timedelta, timezone
+
+    from app.services import demo
+
+    with SessionLocal() as db:
+        cfg = demo.get_config(db)
+        if not cfg.get("enabled"):
+            return
+        now = datetime.now(timezone.utc)
+        last = cfg.get("last_run_at")
+        if last is not None:
+            due = datetime.fromisoformat(last) + timedelta(minutes=cfg["interval_minutes"])
+            if now < due:
+                return
+        sig = demo.emit_demo_signal(db)
+        demo.mark_run(db, now)
+        db.commit()
+        if sig is not None:
+            _queue("signal").enqueue("app.workers.route_signal", {"signal_id": sig.id})

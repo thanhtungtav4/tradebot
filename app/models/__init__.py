@@ -2,7 +2,7 @@
 
 from sqlalchemy import Index, text
 
-from app.models.ops import AdminActivityLog, ComponentHealth
+from app.models.ops import AdminActivityLog, AppSetting, ComponentHealth
 from app.models.signals import (
     MarketCandle,
     Signal,
@@ -26,6 +26,7 @@ from app.models.telegram import (
 
 __all__ = [
     "AdminActivityLog",
+    "AppSetting",
     "BrokerSymbolMapping",
     "ComponentHealth",
     "DataSource",

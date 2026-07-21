@@ -26,6 +26,16 @@ class ComponentHealth(Base):
     )
 
 
+class AppSetting(Base):
+    """Runtime key-value settings toggled from the admin UI (e.g. demo_mode)."""
+
+    __tablename__ = "app_settings"
+
+    key: Mapped[str] = mapped_column(Text, primary_key=True)
+    value: Mapped[dict] = mapped_column(JSONB, nullable=False, server_default="{}")
+    updated_at: Mapped[datetime] = utc_now_column(onupdate=True)
+
+
 class AdminActivityLog(Base):
     __tablename__ = "admin_activity_logs"
 

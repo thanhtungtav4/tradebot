@@ -26,6 +26,7 @@ uv sync --frozen
 uv run alembic upgrade head
 uv run python -m app.seed
 sudo systemctl restart tradebot-api tradebot-worker-market tradebot-worker-signal tradebot-worker-telegram tradebot-worker-maintenance tradebot-scheduler
+uv run python scripts/schedule_jobs.py
 sleep 3
 curl -fsS http://127.0.0.1:8000/api/v1/health/ready && echo " <- deploy OK"
 REMOTE

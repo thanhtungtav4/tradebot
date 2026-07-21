@@ -146,8 +146,32 @@ def logout(request: Request, csrf_token: str = Form(...)):
 
 @router.get("", response_class=HTMLResponse)
 def overview(request: Request, session: dict = Depends(require_session), db: Session = Depends(get_db)):
+    from app.services import demo
     return _render(request, db, session, "admin/overview.html", "Overview",
-                   {"data": admin_svc.overview(db)})
+                   {"data": admin_svc.overview(db), "demo": demo.get_config(db)})
+
+
+@router.post("/demo")
+def update_demo(
+    request: Request,
+    interval_minutes: int = Form(15),
+    enabled: str | None = Form(None),
+    csrf_token: str = Form(...),
+    session: dict = Depends(require_session),
+    db: Session = Depends(get_db),
+):
+    from app.services import demo
+    if not _check_csrf(request, csrf_token):
+        return RedirectResponse("/admin", status_code=303)
+    before = demo.get_config(db)
+    after = demo.set_config(db, enabled=enabled == "on", interval_minutes=interval_minutes)
+    admin_svc.log_action(
+        db, action="update_demo_mode", resource_type="app_setting",
+        resource_id="demo_mode", before=before, after=after,
+        actor=session["u"], **_audit_meta(request),
+    )
+    db.commit()
+    return RedirectResponse("/admin", status_code=303)
 
 
 @router.get("/guide", response_class=HTMLResponse)

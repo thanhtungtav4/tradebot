@@ -9,7 +9,7 @@ from app.seed import seed
 
 pytestmark = pytest.mark.integration
 
-EXPECTED_TABLES = 16
+EXPECTED_TABLES = 17
 
 
 def test_migration_creates_all_tables(migrated_db):

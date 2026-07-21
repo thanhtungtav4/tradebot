@@ -34,6 +34,28 @@
   {{ kpi("Đã gửi", data.delivery_summary.sent, "success", "tổng thành công") }}
 </div>
 
+{# ---- Demo mode toggle ---- #}
+<section class="rounded-xl border border-base-300 bg-base-100 p-4 mb-6" aria-labelledby="demo-title">
+  <h2 id="demo-title" class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-1">Chế độ Demo</h2>
+  <p class="text-xs text-base-content/50 mb-3">
+    Khi bật, hệ thống tự gửi tín hiệu <strong>DEMO</strong> vào group theo chu kỳ để kiểm tra đường gửi Telegram.
+    {% if demo.last_run_at %}<br>Lần gửi gần nhất: {{ demo.last_run_at }}{% endif %}
+  </p>
+  <form method="post" action="/admin/demo" class="flex flex-wrap items-end gap-4">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input type="checkbox" name="enabled" class="toggle toggle-primary" {% if demo.enabled %}checked{% endif %}>
+      <span class="text-sm font-medium">Bật chế độ demo</span>
+    </label>
+    <label class="text-sm">
+      <span class="block text-xs text-base-content/50 mb-1">Chu kỳ (phút)</span>
+      <input type="number" name="interval_minutes" min="1" value="{{ demo.interval_minutes }}"
+             class="input input-bordered input-sm w-24">
+    </label>
+    <button type="submit" class="btn btn-sm btn-primary">Lưu</button>
+  </form>
+</section>
+
 <div class="grid gap-6 lg:grid-cols-3">
   {# ---- Left 2/3: components + feeds ---- #}
   <div class="lg:col-span-2 space-y-6">

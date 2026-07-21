@@ -39,6 +39,13 @@ JOBS = (
         "interval": 60,
         "description": "Refresh cached component health rows",
     },
+    {
+        "id": "tradebot_demo_tick",
+        "func": "app.workers.demo_tick",
+        "queue": "maintenance",
+        "interval": 60,
+        "description": "Emit demo signal when demo mode is on (self-checks DB interval)",
+    },
 )
 
 
