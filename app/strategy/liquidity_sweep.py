@@ -33,6 +33,15 @@ class LiquiditySweepStrategy(BaseStrategy):
     name = "Liquidity Sweep"
     required_timeframes = ["M15", "H1"]
     trigger_timeframes = ["M15"]
+    tagline = "Quét thanh khoản đỉnh/đáy rồi vào lệnh đảo chiều"
+    description = (
+        "Chiến lược này chờ giá quét qua đỉnh hoặc đáy gần nhất (nơi tập trung "
+        "lệnh chờ), rồi đóng nến ngược lại. Khi có nến xác nhận, bot vào lệnh "
+        "theo hướng đảo chiều với điểm dừng lỗ ngay sau vùng quét. Hợp với vàng "
+        "và các cặp chính, khung M15 (bot đọc thêm H1 để xác định xu hướng)."
+    )
+    recommended_symbols = ["XAUUSD", "EURUSD"]
+    style = "INTRADAY"
 
     def _cfg(self, context: StrategyContext) -> dict:
         return {**_DEFAULTS, **(context.strategy_config or {})}

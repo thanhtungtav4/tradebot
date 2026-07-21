@@ -8,6 +8,11 @@ class BaseStrategy:
     name: str
     required_timeframes: list[str]
     trigger_timeframes: list[str]
+    # Metadata cho UI catalog + auto-guide TradingView (đợt 1).
+    tagline: str
+    description: str
+    recommended_symbols: list[str]
+    style: str  # "SWING" | "INTRADAY" | "SCALP"
 
     def detect(self, context: StrategyContext) -> list[SignalCandidate]:
         raise NotImplementedError
